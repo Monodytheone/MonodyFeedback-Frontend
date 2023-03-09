@@ -1,8 +1,10 @@
 <template>
-  <nav>
+  <!-- <nav>
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
-  </nav>
+  </nav> -->
+  
+  <!-- 这个不能删，不然一切路由都不起作用了 -->
   <router-view/>
 </template>
 
