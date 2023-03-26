@@ -1,11 +1,7 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <!-- 这个不能删，不然一切路由都不起作用了 -->
+  <router-view />
 </template>
-
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
