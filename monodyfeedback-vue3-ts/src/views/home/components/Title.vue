@@ -1,7 +1,7 @@
 <!-- 用了float，完了以后记得清除浮动 -->
 <template>
-    <!-- 标题左侧的蓝色竖线 -->
     <div id="area">
+        <!-- 标题左侧的蓝色竖线 -->
         <div id="title-line"></div>
         <b id="titleText">{{ $attrs.text }}</b>
     </div>

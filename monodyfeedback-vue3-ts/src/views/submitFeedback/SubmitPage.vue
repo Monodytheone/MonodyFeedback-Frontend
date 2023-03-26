@@ -1,7 +1,7 @@
 <template>
     <div class="border-submitPage">
-        <BackToHome/>
-        
+        <BackToHome />
+
         <div id="topBox" class="feedbackBox">
             <label for="problemInput">问题描述</label>
             <textarea id="problemInput" type="text" placeholder="请详细描述问题的细节（字数不少于10字）..." v-model="problemDescription"
@@ -25,40 +25,55 @@
         </div>
 
         <div class="feedbackBox">
-            <label>图片上传<span id="imgUploadTip">（最多上传20张图片，10MB以下）</span></label>
-            <Pics id="uploader" />
+            <label>图片上传<span id="imgUploadTip">（最多上传10张图片，10MB以下）</span></label>
+            <Pics :continueSubmit="continueSubmit" ref="pics" />
             <div class="clearfix"></div>
         </div>
 
         <hr>
-        <a-button id="submitButton" type="primary" @click="test_showDescription">测试--打印信息</a-button>
+        <div style="height: 500px;"></div>
+
+        <a-button id="submitButton" type="primary" @click="submit">提交</a-button>
     </div>
+
+    <!-- 遮罩层: -->
+    <Overlay :isShow="overlayIsShow" :message="'提交中...'"/>
+
 </template>
+
+
 <script lang="ts">
-import { defineComponent, ref, computed, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import Pics from './components/Pics.vue';
 import BackToHome from './components/BackToHome.vue';
+import showErrorModal from '../loginPage/showErrorModal';
+import { postSubmit, PictureInfo } from '@/api/submitAPIs/postSubmit';
+import showSubmitSuccessModalAndJumpToServiceProgressPage from './components/showSubmitSuccessModalAndJumpToServiceProgressPage';
+import Overlay from '@/components/Overlay.vue';
+
 export default defineComponent({
     name: 'SubmitPage',
     components: {
         Pics,
         BackToHome,
+        Overlay,
     },
     setup() {
         const problemDescription = ref('')
         const email = ref('')
         const telNumber = ref('')
+        // const pics = ref()
+        const pics = ref<InstanceType<typeof Pics>>(); // 这么写有提示
+        const overlayIsShow = ref(false)  // 遮罩层是否显示
+
+        /** 调用子级组件的方法，上传图片 */
+        const picsUpload = () => {
+            pics.value?.handleUpload()
+        }
 
         function test_showDescription() {
             console.log(problemDescription.value, email.value, telNumber.value)
         }
-
-        const fileList = ref([
-            { url: 'https://fastly.jsdelivr.net/npm/@vant/assets/leaf.jpeg' },
-            // Uploader 根据文件后缀来判断是否为图片文件
-            // 如果图片 URL 中不包含类型信息，可以添加 isImage 标记来声明
-            { url: 'https://cloud-image', isImage: true },
-        ]);
 
         // 校验问题描述输入框的字数是否小于10，是则警告，必须在框内输入过内容之后才能触发
         const problemDescWarnIsShow = ref(false)
@@ -87,7 +102,7 @@ export default defineComponent({
             }
         })
 
-        // 校验手机号格式：以'1'开头且为11位数字
+        // 校验手机号格式
         const telRegex = /^1(3\d|4[5-9]|5[0-35-9]|6[567]|7[0-8]|8\d|9[0-35-9])\d{8}$/;
         const telWarnIsShow = ref(false)
         watch(telNumber, () => {
@@ -101,10 +116,34 @@ export default defineComponent({
             }
         })
 
+        const submit = () => {
+            if (problemDescription.value.length > 10 && !emailWarnIsShow.value && !telWarnIsShow.value) {
+                overlayIsShow.value = true  // 显示遮罩层
+                pics.value?.handleUpload()  // 先调用照片墙子级组件的方法，上传图片
+            }
+            else {
+                showErrorModal('请确保问题描述不少于10个字，并确保邮箱和手机号格式正确')
+            }
+        }
+
+        /** 用于上传图片成功之后，向后端提交Submission */
+        const continueSubmit = (pictureInfos: PictureInfo[]) => {
+            postSubmit(telNumber.value, email.value, problemDescription.value, pictureInfos)
+                .then(response => {
+                    overlayIsShow.value = false
+                    showSubmitSuccessModalAndJumpToServiceProgressPage()
+                })
+                .catch(error => {
+                    overlayIsShow.value = false
+                    showErrorModal(error.response.data)  // 后端会根据环境的不同来进行错误响应信息的详略
+                })
+        }
+
         return {
-            problemDescription, email, telNumber, fileList,
+            problemDescription, email, telNumber,
             problemDescWarnIsShow, emailWarnIsShow, telWarnIsShow,
-            test_showDescription,
+            pics, overlayIsShow,
+            test_showDescription, picsUpload, submit, continueSubmit,
         }
     }
 })
@@ -163,7 +202,7 @@ input {
     /* margin: 30px 0; */
     position: fixed;
     bottom: 20px;
-    right: 45%;
+    right: 48%;
 }
 
 /* 输入数据不合格式时黄色边框警告 */

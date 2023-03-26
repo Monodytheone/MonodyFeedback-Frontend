@@ -1,22 +1,61 @@
 <template>
-    <div class="head">
-
-        <!-- 头像 -->
-        <!-- Ant的任何显示图像的组件都只能读取在线图像，无法显示本地图像，以后头像在线读取了就可以用下面这行了 -->
-        <!-- <a-avatar src="https://img0.baidu.com/it/u=2635634373,4014077767&fm=253&fmt=auto&app=120&f=JPEG?w=1067&h=800" /> -->
-        <img id="imgAvatar" src="@/assets/avatar.png">
+    <!-- 已登录时的显示: -->
+    <div class="head" v-if="isOnline">
+        <img id="imgAvatar" :src="avatarUrl">
         <div id="userInfo">
-            <div id="userName">昵称</div><br>
-            <p id="userId">ID: 12345678</p>
+            <div id="userName">{{ userName }}</div><br>
+            <p id="userId">ID: {{ id }}</p>
+            <a-button id="logoutButton" danger :size="'small'" @click="logout">退出登录</a-button>
         </div>
         <div style="clear:both"></div>
     </div>
+
+    <!-- 未登录时的显示: -->
+    <div id="loginButtonDiv" v-if="isOnline === false">
+        <a-button id="loginButton" @click="jumpToLoginPage">登录</a-button>
+    </div>
+
     <div style="height: 60px"></div>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, onBeforeMount, getCurrentInstance, ref } from 'vue';
+import { getUserInfo } from '@/api/identityAPIs/getUserInfo';
+import { getAvatarUrl } from '@/api/identityAPIs/getAvatarUrl';
+import router from '@/router';
 export default defineComponent({
     name: 'Head',
+    setup() {
+        let isOnline = ref(false)
+        let userName = ref('')
+        let id = ref('')
+        let avatarUrl = ref('')
+
+        // document.getElementById('imgAvatar').src = avatarUrl
+        onBeforeMount(() => {
+            getUserInfo()
+                .then((response) => {
+                    isOnline.value = true
+                    userName.value = response.data.userName
+                    id.value = response.data.id
+                    localStorage.setItem("submitterId", id.value)
+                    
+                    // 确认已登录后向后端请求头像Url
+                    getAvatarUrl().then((response) => {avatarUrl.value = response.data})
+                })
+        })
+        function logout() {
+            localStorage.removeItem('jwt')
+            localStorage.removeItem('submitterId')
+            location.reload()  // 刷新页面
+        }
+        function jumpToLoginPage() {
+            router.push('/login')
+        }
+        return {
+            isOnline, userName, id, avatarUrl,
+            logout, jumpToLoginPage,
+        }
+    }
 })
 </script>
 
@@ -34,13 +73,20 @@ export default defineComponent({
     background-color: white;
 }
 
+#loginButtonDiv {
+    position: fixed;
+    width: 350px;
+    height: 60px;
+    background-color: white;
+}
+
 #userName {
     font-weight: bold;
     font-size: 10px;
 }
 
 #userId {
-    font-size: 7px;
+    font-size: 1px;
     color: gray;
 }
 
@@ -57,5 +103,16 @@ export default defineComponent({
 
 .head {
     position: fixed;
+}
+
+#logoutButton {
+    position: relative;
+    bottom: 47px;
+    left: 75px;
+    font-size: smaller;
+}
+
+#loginButton {
+    margin-top: 13px;
 }
 </style>

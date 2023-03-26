@@ -1,12 +1,11 @@
 <!-- Vant照片墙 -->
 <template>
     <div class="clearfix">
-        <!-- action 属性表示上传文件时的后端接口地址， -->
-        <a-upload action="https://www.mocky.io/v2/5cc8019d300000980a055e76" list-type="picture-card"
-            v-model:file-list="fileList" @preview="handlePreview">
-            <div v-if="fileList.length < 6">
+        <a-upload accept=".png,.jpg,.jpeg,.webp" list-type="picture-card" :before-upload="beforeUpload"
+            v-model:file-list="fileList" @preview="handlePreview" @remove="handleRemove">
+            <div v-if="fileList.length < 10">
                 <plus-outlined />
-                <div class="ant-upload-text">点击上传</div>
+                <div class="ant-upload-text">选择图片</div>
             </div>
         </a-upload>
         <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
@@ -14,9 +13,13 @@
         </a-modal>
     </div>
 </template>
+
 <script lang="ts">
 import { PlusOutlined } from '@ant-design/icons-vue';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
+import type { UploadProps } from 'ant-design-vue';
+import cosSubmitIntance from '@/api/instances/cosSubmitIntance';
+import { PictureInfo } from '@/api/submitAPIs/postSubmit';
 
 function getBase64(file: File) {
     return new Promise((resolve, reject) => {
@@ -47,25 +50,17 @@ export default defineComponent({
     components: {
         PlusOutlined,
     },
-    setup() {
+    props: {
+        continueSubmit: {
+            type: Function,
+            required: true,
+        }
+    },
+    setup(props, { expose }) {
         const previewVisible = ref<boolean>(false);
         const previewImage = ref<string | undefined>('');
 
-        const fileList = ref<FileItem[]>([
-            {
-                uid: '-1',
-                name: 'image.png',
-                status: 'done',
-                url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            },
-            {
-                uid: '-2',
-                name: 'image.png',
-                status: 'done',
-                url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-            },
-
-        ]);
+        const fileList = ref<FileItem[]>([]);
 
         const handleCancel = () => {
             previewVisible.value = false;
@@ -81,6 +76,77 @@ export default defineComponent({
             fileList.value = newFileList;
         };
 
+        // beforeUpload返回false，来禁止默认上传行为。同时更新fileList
+        const beforeUpload: UploadProps['beforeUpload'] = file => {
+            fileList.value = [...fileList.value, file];
+            console.log(fileList)
+            return false;
+        };
+
+        const handleRemove: UploadProps['onRemove'] = (file: any) => {
+            const index = fileList.value.indexOf(file);
+            const newFileList = fileList.value.slice();
+            newFileList.splice(index, 1);
+            fileList.value = newFileList;
+            console.log(fileList)
+        };
+
+        let uploadedPictureInfos: PictureInfo[] = []
+        let completedUploadNumber = ref(0)  // 已完成上传的数量（不论成功还是失败）
+        watch(completedUploadNumber, () => {  // 全部上传完毕后执行下一步动作，向后端提交Submission
+            if (completedUploadNumber.value === fileList.value.length) {
+                props.continueSubmit(uploadedPictureInfos)
+            }
+        })
+
+        /** 上传fileList中的全部图片 */
+        const handleUpload = () => {
+            if (fileList.value.length === 0) {  // 若没有图片则直接执行下一步动作，向后端提交Submission
+                props.continueSubmit(uploadedPictureInfos)
+            }
+
+            const checkFileType = (fileName: string) => {
+                if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.webp')) {
+                    return true
+                }
+                else return false
+            }
+            for (let index = 0; index < fileList.value.length; index++) {
+                let file = fileList.value[index]
+                if (checkFileType(file.name as string) == false) {
+                    console.error(`图 ${index + 1} 错误：只允许上传图片`)
+                    completedUploadNumber.value += 1
+                    continue
+                }
+                // 禁止大于10MB的图片上传
+                if (file.originFileObj.size / 1024 / 1024 > 10) {
+                    console.error(`图 ${index + 1} 大于10MB`)
+                    completedUploadNumber.value += 1
+                    continue
+                }
+                let bucket = process.env.VUE_APP_COS_PICTURE_BUCKET;
+                let region = process.env.VUE_APP_COS_PICTURE_REGION;
+                let fullObjectKey = `${process.env.VUE_APP_COS_PICTURE_FOLDER}/${localStorage.getItem('submitterId')}/${file.uid}.png`;  // id记得用小写字母
+                cosSubmitIntance.putObject({
+                    Bucket: bucket,
+                    Region: region,
+                    Key: fullObjectKey,  // id记得用小写字母
+                    Body: file.originFileObj,
+                    onProgress: function (progressData) {
+                    }
+                }, function (err, data) {
+                    completedUploadNumber.value += 1
+                    console.log(err || data);
+                    if (data.statusCode as number < 400) {
+                        console.log('push')
+                        uploadedPictureInfos.push(new PictureInfo(bucket, region, fullObjectKey))
+                    }
+                })
+            }
+        };
+
+        expose({ handleUpload })  // 暴露出去，供父级组件调用来上传图片
+
         return {
             previewVisible,
             previewImage,
@@ -88,6 +154,9 @@ export default defineComponent({
             handleCancel,
             handlePreview,
             handleChange,
+            beforeUpload,
+            handleRemove,
+            handleUpload,
         };
     },
 });
