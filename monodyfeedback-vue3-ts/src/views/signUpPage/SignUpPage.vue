@@ -33,7 +33,7 @@ import type { FormInstance } from 'ant-design-vue';
 import checkUserNameUsability from '@/api/identityAPIs/checkUserNameUsability';
 import signUp from '@/api/identityAPIs/signUp';
 import showSignUpSuccessModalAndJumpToLoginPage from './showSignUpSuccessModalAndJumpToLoginPage.ts';
-import showErrorModal from '../loginPage/showErrorModal';
+import showErrorModal from '../../common/showErrorModal';
 import Overlay from '@/components/Overlay.vue';
 
 
@@ -108,7 +108,7 @@ export default defineComponent({
             }
             else {
                 if (formState.checkPass !== '') {
-                    formRef.value.validateFields('checkPass');
+                    formRef.value?.validateFields('checkPass');
                 }
                 return Promise.resolve();
             }
@@ -135,14 +135,14 @@ export default defineComponent({
         const handleFinish = (values: FormState) => {
             console.log(values, formState);
         };
-        const handleFinishFailed = errors => {
+        const handleFinishFailed = (errors: any) => {
             console.log(errors);
         };
         const resetForm = () => {
-            formRef.value.resetFields();
+            formRef.value?.resetFields();
             formState.userName = ''
         };
-        const handleValidate = (...args) => {
+        const handleValidate = (...args: any[]) => {
             console.log(args);
         };
         return {

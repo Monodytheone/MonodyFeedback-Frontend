@@ -44,8 +44,9 @@ export default defineComponent({
                 })
         })
         function logout() {
-            localStorage.removeItem('jwt')
-            localStorage.removeItem('submitterId')
+            // localStorage.removeItem('jwt')
+            // localStorage.removeItem('submitterId')
+            localStorage.clear()
             location.reload()  // 刷新页面
         }
         function jumpToLoginPage() {

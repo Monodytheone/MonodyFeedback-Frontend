@@ -1,5 +1,5 @@
 import COS from 'cos-js-sdk-v5';
-import showOfflineModalAndJump from '@/components/showOfflineModalAndJump';
+import showOfflineModalAndJump from '@/common/showOfflineModalAndJump';
 
 /** submitter提交Paragraph图片的cos实例 */
 const cosSubmitIntance = new COS({

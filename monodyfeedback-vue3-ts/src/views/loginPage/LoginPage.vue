@@ -22,7 +22,7 @@
 <script lang="ts">
 import { defineComponent, reactive, onMounted, onBeforeMount, getCurrentInstance } from 'vue';
 import { postLogin } from '@/api/identityAPIs/postLogin'
-import showErrorModal from './showErrorModal';
+import showErrorModal from '../../common/showErrorModal';
 import showSuccessModal from './showSuccessModal'
 
 interface FormState {

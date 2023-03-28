@@ -5,7 +5,7 @@
         <div style="clear:both"></div>
         <van-grid :border="false">
             <van-grid-item icon="column" text="问题反馈" to="/submit" />
-            <van-grid-item icon="manager" text="编辑资料" />
+            <van-grid-item icon="manager" text="更换头像" to="/setAvatar"/>
             <van-grid-item icon="setting" text="修改密码" />
             <van-grid-item icon="photo-o" text="文字" />
         </van-grid>
