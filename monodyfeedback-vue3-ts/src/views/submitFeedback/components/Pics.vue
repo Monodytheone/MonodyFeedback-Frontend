@@ -20,6 +20,7 @@ import { defineComponent, ref, watch } from 'vue';
 import type { UploadProps } from 'ant-design-vue';
 import cosSubmitIntance from '@/api/instances/cosSubmitIntance';
 import { PictureInfo } from '@/api/submitAPIs/postSubmit';
+import { message } from 'ant-design-vue';
 
 function getBase64(file: File) {
     return new Promise((resolve, reject) => {
@@ -80,6 +81,12 @@ export default defineComponent({
         const beforeUpload: UploadProps['beforeUpload'] = file => {
             fileList.value = [...fileList.value, file];
             console.log(fileList)
+
+
+            const isLt2M = file.size / 1024 / 1024 < 10;
+            if (!isLt2M) {
+                message.error('你不能上传大于10MB的图片');
+            }
             return false;
         };
 

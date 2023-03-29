@@ -30,7 +30,6 @@ export default defineComponent({
         let id = ref('')
         let avatarUrl = ref('')
 
-        // document.getElementById('imgAvatar').src = avatarUrl
         onBeforeMount(() => {
             getUserInfo()
                 .then((response) => {
@@ -44,8 +43,6 @@ export default defineComponent({
                 })
         })
         function logout() {
-            // localStorage.removeItem('jwt')
-            // localStorage.removeItem('submitterId')
             localStorage.clear()
             location.reload()  // 刷新页面
         }
