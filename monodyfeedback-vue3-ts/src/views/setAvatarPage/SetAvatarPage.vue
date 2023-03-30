@@ -1,5 +1,6 @@
 <!-- Vant照片墙 -->
 <template>
+    <div v-title data-title="更换头像 - Monody Feedback"></div>
     <div class="clearfix">
         <router-link to="/">返回主界面</router-link><br><br>
         <a-upload accept=".png,.jpg,.jpeg,.webp" list-type="picture-card" :before-upload="beforeUpload"

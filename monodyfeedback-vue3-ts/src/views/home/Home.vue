@@ -1,4 +1,5 @@
 <template>
+    <div v-title data-title="Monody Feedback"></div>
     <div class="border-home">
 
         <Head />

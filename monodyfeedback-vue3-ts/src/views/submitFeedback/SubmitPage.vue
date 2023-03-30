@@ -1,4 +1,5 @@
 <template>
+    <div v-title data-title="提交反馈 - Monody Feedback"></div>
     <div class="border-submitPage">
         <BackToHome />
 

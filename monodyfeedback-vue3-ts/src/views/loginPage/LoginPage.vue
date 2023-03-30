@@ -1,4 +1,5 @@
 <template>
+    <div v-title data-title="登录 - Monody Feedback"></div>
     <div id="displayRange">
         <a-form :model="formState" name="basic" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }" autocomplete="off"
             @finish="onFinish" @finishFailed="onFinishFailed">
@@ -13,10 +14,9 @@
             <p class="routerRow">没有账号？ <router-link to="/signUp">立即注册</router-link></p>
             <p class="routerRow">账号被锁定？ <router-link to="/changePasswordWithUserNamePage">修改密码</router-link></p>
 
-
             <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
                 <a-button id="notLogInTempButton" href="/" type="default" html-type="submit">暂不登录</a-button>
-                <a-button type="primary" html-type="submit" :loading="uploading">{{ uploading ? '登录中' : '登录'}}</a-button>
+                <a-button type="primary" html-type="submit" :loading="uploading">{{ uploading ? '登录中' : '登录' }}</a-button>
             </a-form-item>
         </a-form>
     </div>

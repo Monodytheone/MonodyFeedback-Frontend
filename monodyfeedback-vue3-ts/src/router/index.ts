@@ -41,6 +41,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/changePasswordWithUserNamePage',
     name: 'ChangePasswordWithUserNamePagee',
     component: () => import('@/views/changePasswordPage/ChangePasswordWithUserNamePage.vue'),
+  },
+  {
+    path: '/processor',
+    name: 'ProcessorHome',
+    component: () => import('@/processorViews/home/ProcessorHome.vue'),
   }
 ]
 

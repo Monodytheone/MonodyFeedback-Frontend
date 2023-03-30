@@ -1,4 +1,5 @@
 <template>
+    <div v-title data-title="注册 - Monody Feedback"></div>
     <div id="displayRange">
         <a-form ref="formRef" name="custom-validation" :model="formState" :rules="rules" v-bind="layout"
             @finish="handleFinish" @validate="handleValidate" @finishFailed="handleFinishFailed">
