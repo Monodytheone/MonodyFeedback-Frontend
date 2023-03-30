@@ -21,6 +21,7 @@
 import { defineComponent, onBeforeMount, getCurrentInstance, ref } from 'vue';
 import { getUserInfo } from '@/api/identityAPIs/getUserInfo';
 import { getAvatarUrl } from '@/api/identityAPIs/getAvatarUrl';
+import logoutAPI from '@/api/identityAPIs/logout'
 import router from '@/router';
 export default defineComponent({
     name: 'Head',
@@ -43,6 +44,7 @@ export default defineComponent({
                 })
         })
         function logout() {
+            logoutAPI()
             localStorage.clear()
             location.reload()  // 刷新页面
         }

@@ -31,6 +31,16 @@ const routes: Array<RouteRecordRaw> = [
     path: '/setAvatar',
     name: 'SetAvatarPage',
     component: () => import('@/views/setAvatarPage/SetAvatarPage.vue'),
+  },
+  {
+    path: '/ChangePasswordWithoutUserNamePage',
+    name: 'ChangePasswordWithoutUserNamePage',
+    component: () => import('@/views/changePasswordPage/ChangePasswordWithoutUserNamePage.vue'),
+  },
+  {
+    path: '/changePasswordWithUserNamePage',
+    name: 'ChangePasswordWithUserNamePagee',
+    component: () => import('@/views/changePasswordPage/ChangePasswordWithUserNamePage.vue'),
   }
 ]
 

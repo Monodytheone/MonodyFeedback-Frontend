@@ -37,8 +37,7 @@
     </div>
 
     <!-- 遮罩层: -->
-    <Overlay :isShow="overlayIsShow" :message="'提交中...'"/>
-
+    <Overlay :isShow="overlayIsShow" :message="'提交中...'" />
 </template>
 
 
@@ -141,7 +140,12 @@ export default defineComponent({
                 })
                 .catch(error => {
                     overlayIsShow.value = false
-                    showErrorModal(error.response.data)  // 后端会根据环境的不同来进行错误响应信息的详略
+                    if (error.response.status == 403) {
+                        showErrorModal('您的账号不可以提交反馈哦~')
+                    }
+                    else {
+                        showErrorModal(`${error.response.status}： ${error.response.data}`)  // 后端会根据环境的不同来进行错误响应信息的详略
+                    }
                 })
         }
 

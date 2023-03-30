@@ -1,5 +1,6 @@
 import COS from 'cos-js-sdk-v5';
 import showOfflineModalAndJump from '@/common/showOfflineModalAndJump';
+import showErrorModal from '@/common/showErrorModal';
 
 /** submitter提交Paragraph图片的cos实例 */
 const cosSubmitIntance = new COS({
@@ -15,7 +16,12 @@ const cosSubmitIntance = new COS({
                 var credentials = data.credentials;
             }
             catch (e) {
-                showOfflineModalAndJump();  // 若获取临时密钥失败就是401了，跳转至登录界面
+                if (xhr.status == 403) {
+                    showErrorModal('403：您的账号不允许提交反馈哦')
+                }
+                else {
+                    showOfflineModalAndJump();  // 若获取临时密钥失败就是401了，跳转至登录界面
+                }
             }
             if (!data || !credentials) {
                 return console.error('credentials invalid:\n' + JSON.stringify(data, null, 2))

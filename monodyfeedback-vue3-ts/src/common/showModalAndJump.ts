@@ -1,7 +1,7 @@
 import router from '@/router';
 import { Modal } from 'ant-design-vue';
 
-export default function (isSuccessful: boolean, routerPath: string, message: string, routerTargetName: string) {
+export default function (isSuccessful: boolean, routerPath: string, message: string, routerTargetName: string, okText: string) {
     let secondsToGo = 5;
     let hasJumped: boolean = false  // 是否已经跳转过页面了
     let modal: any
@@ -9,7 +9,7 @@ export default function (isSuccessful: boolean, routerPath: string, message: str
         modal = Modal.success({
             title: message,
             content: `${secondsToGo} 秒后跳转至${routerTargetName}`,
-            okText: '确定',
+            okText: okText,
             okType: "default",
             onOk: function () {
                 router.push(routerPath)
@@ -21,7 +21,7 @@ export default function (isSuccessful: boolean, routerPath: string, message: str
         modal = Modal.error({
             title: message,
             content: `${secondsToGo} 秒后跳转至${routerTargetName}`,
-            okText: '确定',
+            okText: okText,
             okType: "danger",
             onOk: function () {
                 router.push(routerPath)

@@ -145,7 +145,7 @@ export default defineComponent({
                 else {   // 上传成功后，向后端发请求更新该用户头像的对象键
                     changeAvatarObjectKey(fullObjectKey)
                         .then(response => {
-                            showModalAndJump(true, '/', '设置头像成功', '主界面')
+                            showModalAndJump(true, '/', '设置头像成功', '主界面', '确定')
                         })
                         .catch(error => {
                             showErrorModal(`${error.response.status}： ${error.response.data}`)
