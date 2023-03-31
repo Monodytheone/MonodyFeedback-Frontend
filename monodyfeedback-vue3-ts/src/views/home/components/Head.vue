@@ -1,20 +1,21 @@
 <template>
     <!-- 已登录时的显示: -->
-    <div class="head" v-if="isOnline">
-        <img id="imgAvatar" :src="avatarUrl">
-        <div id="userInfo">
-            <div id="userName">{{ userName }}</div><br>
-            <p id="userId">ID: {{ id }}</p>
-            <a-button id="logoutButton" danger :size="'small'" @click="logout">退出登录</a-button>
+    <a-affix :offset-top="0">
+        <div class="head" v-if="isOnline">
+            <img id="imgAvatar" :src="avatarUrl">
+            <div id="userInfo">
+                <div id="userName">{{ userName }}</div><br>
+                <p id="userId">ID: {{ id }}</p>
+                <a-button id="logoutButton" type="dashed" :size="'small'" @click="logout">退出登录</a-button>
+            </div>
+            <div style="clear:both"></div>
         </div>
-        <div style="clear:both"></div>
-    </div>
 
-    <!-- 未登录时的显示: -->
-    <div id="loginButtonDiv" v-if="isOnline === false">
-        <a-button id="loginButton" @click="jumpToLoginPage">登录</a-button>
-    </div>
-
+        <!-- 未登录时的显示: -->
+        <div id="loginButtonDiv" v-if="isOnline === false">
+            <a-button id="loginButton" @click="jumpToLoginPage">登录</a-button>
+        </div>
+    </a-affix>
     <div style="height: 60px"></div>
 </template>
 <script lang="ts">
@@ -38,9 +39,9 @@ export default defineComponent({
                     userName.value = response.data.userName
                     id.value = response.data.id
                     localStorage.setItem("submitterId", id.value)
-                    
+
                     // 确认已登录后向后端请求头像Url
-                    getAvatarUrl().then((response) => {avatarUrl.value = response.data})
+                    getAvatarUrl().then((response) => { avatarUrl.value = response.data })
                 })
         })
         function logout() {
@@ -75,6 +76,7 @@ export default defineComponent({
 
 #loginButtonDiv {
     position: fixed;
+    /* 虽然用了固钉，但这个依然不能去，不然已登录和未登录两种状态总有一种显示不正常 */
     width: 350px;
     height: 60px;
     background-color: white;
@@ -107,9 +109,15 @@ export default defineComponent({
 
 #logoutButton {
     position: relative;
+    color: cadetblue;
     bottom: 47px;
     left: 75px;
     font-size: smaller;
+}
+
+#logoutButton:hover {
+    color: red;
+    border-color: crimson;
 }
 
 #loginButton {

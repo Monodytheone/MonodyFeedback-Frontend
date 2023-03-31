@@ -60,17 +60,14 @@ export default defineComponent({
         Overlay,
     },
     setup() {
+        checkLoginStatusAndJumpToLoginPageIf401();
+
         const problemDescription = ref('')
         const email = ref('')
         const telNumber = ref('')
         // const pics = ref()
         const pics = ref<InstanceType<typeof Pics>>(); // 这么写有提示
         const overlayIsShow = ref(false)  // 遮罩层是否显示
-
-        onBeforeMount(() => {
-            checkLoginStatusAndJumpToLoginPageIf401();
-        })
-
 
         /** 调用子级组件的方法，上传图片 */
         const picsUpload = () => {

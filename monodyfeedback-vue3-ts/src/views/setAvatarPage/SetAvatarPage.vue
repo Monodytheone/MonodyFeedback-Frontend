@@ -65,16 +65,15 @@ export default defineComponent({
         }
     },
     setup() {
+        checkLoginStatusAndJumpToLoginPageIf401()
+
+
         const previewVisible = ref<boolean>(false);
         const previewImage = ref<string | undefined>('');
 
         const fileList = ref<FileItem[]>([]);
 
         const uploading = ref(false)
-
-        onBeforeMount(() => {
-            checkLoginStatusAndJumpToLoginPageIf401()
-        })
 
         const handleCancel = () => {
             previewVisible.value = false;

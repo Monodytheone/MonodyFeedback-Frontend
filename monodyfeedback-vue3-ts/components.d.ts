@@ -12,6 +12,7 @@ declare module '@vue/runtime-core' {
     Overlay: typeof import('./src/components/Overlay.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SubmissionItem: typeof import('./src/components/SubmissionItem.vue')['default']
     VanGrid: typeof import('vant/es')['Grid']
     VanGridItem: typeof import('vant/es')['GridItem']
     VanIcon: typeof import('vant/es')['Icon']
