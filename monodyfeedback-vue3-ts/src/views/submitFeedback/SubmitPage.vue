@@ -1,3 +1,4 @@
+<!-- 提交反馈页面 -- 本页面的输入校验是自己写的，没有用现成的组件改 -->
 <template>
     <div v-title data-title="提交反馈 - Monody Feedback"></div>
     <div class="border-submitPage">
@@ -47,8 +48,8 @@ import { defineComponent, ref, watch, onBeforeMount } from 'vue';
 import Pics from './components/Pics.vue';
 import BackToHome from './components/BackToHome.vue';
 import showErrorModal from '../../common/showErrorModal';
+import showModalAndJump from '@/common/showModalAndJump';
 import { postSubmit, PictureInfo } from '@/api/submitAPIs/postSubmit';
-import showSubmitSuccessModalAndJumpToServiceProgressPage from './components/showSubmitSuccessModalAndJumpToServiceProgressPage';
 import Overlay from '@/components/Overlay.vue';
 import checkLoginStatusAndJumpToLoginPageIf401 from '@/common/checkLoginStatusAndJumpToLoginPageIf401';
 
@@ -134,7 +135,7 @@ export default defineComponent({
             postSubmit(telNumber.value, email.value, problemDescription.value, pictureInfos)
                 .then(response => {
                     overlayIsShow.value = false
-                    showSubmitSuccessModalAndJumpToServiceProgressPage()
+                    showModalAndJump(true, '/progress', '提交成功', '服务进度页面', '确定')
                 })
                 .catch(error => {
                     overlayIsShow.value = false
@@ -185,7 +186,6 @@ textarea {
 
 input {
     width: 100%;
-    /* height: 2em; */
     padding: 0.3em 0.5em;
     margin: 5px 0;
     border: 1px grey solid;
@@ -207,7 +207,6 @@ input {
 }
 
 #submitButton {
-    /* margin: 30px 0; */
     position: fixed;
     bottom: 20px;
     right: 48%;
@@ -215,14 +214,12 @@ input {
 
 /* 输入数据不合格式时黄色边框警告 */
 .warningInput {
-    /* border: 3px rgba(209, 209, 23, 0.952) solid; */
     border: 2px #d9df5b solid;
 }
 
 .warnText {
     float: left;
     font-size: 12px;
-    /* color: #A67D3D; */
     color: #b4ba40;
 }
 </style>

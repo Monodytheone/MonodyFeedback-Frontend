@@ -33,8 +33,8 @@ import { defineComponent, reactive, ref } from 'vue';
 import type { FormInstance } from 'ant-design-vue';
 import checkUserNameUsability from '@/api/identityAPIs/checkUserNameUsability';
 import signUp from '@/api/identityAPIs/signUp';
-import showSignUpSuccessModalAndJumpToLoginPage from './showSignUpSuccessModalAndJumpToLoginPage.ts';
 import showErrorModal from '../../common/showErrorModal';
+import showModalAndJump from '@/common/showModalAndJump';
 import Overlay from '@/components/Overlay.vue';
 
 
@@ -61,11 +61,11 @@ export default defineComponent({
             signUp(formState.userName, formState.pass)
                 .then(response => {
                     overlayIsShow.value = false
-                    showSignUpSuccessModalAndJumpToLoginPage()
+                    showModalAndJump(true, '/login', '注册成功', '登录页面', '去登录')
                 })
                 .catch(error => {
                     overlayIsShow.value = false
-                    showErrorModal(`${error.response.status}:  ${error.response.data}`)  // 后端会根据环境的不同来进行错误响应信息的详略
+                    showErrorModal(`${error.response.status}:  ${error.response.data}，请试着使用纯英文用户名？`)  // 后端会根据环境的不同来决定错误响应信息的详略
                 })
         }
 

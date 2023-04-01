@@ -25,7 +25,7 @@
 import { defineComponent, reactive, ref, onMounted, onBeforeMount, getCurrentInstance } from 'vue';
 import { postLogin } from '@/api/identityAPIs/postLogin'
 import showErrorModal from '../../common/showErrorModal';
-import showSuccessModal from './showSuccessModal'
+import showModalAndJump from '@/common/showModalAndJump';
 
 interface FormState {
     username: string;
@@ -43,7 +43,7 @@ export default defineComponent({
             postLogin(formState.username, formState.password)
                 .then((response) => {
                     localStorage.setItem("jwt", response.data);
-                    showSuccessModal()  // 弹出登录成功跳转提示框
+                    showModalAndJump(true, '/', '登录成功', '主页面', '确定')
                 })
                 .catch(error => {
                     showErrorModal(error.response.data)  // 弹出失败提示框
