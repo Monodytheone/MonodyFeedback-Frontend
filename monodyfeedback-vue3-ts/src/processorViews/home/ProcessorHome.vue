@@ -12,7 +12,7 @@
                 <a-input-password v-model:value="formState.password" />
             </a-form-item>
 
-            <a href="https://github.com/Monodytheone/MonodyFeedback-Backend" target="_blank">前往项目GitHub主页，获取试用处理者账号</a>
+            <a :href="githubLink" target="_blank">前往项目GitHub主页，获取试用处理者账号</a>
 
             <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
                 <a-button id="button" type="primary" html-type="submit" :loading="uploading">{{ uploading ? '登录中' : '登录' }}</a-button>
@@ -37,6 +37,7 @@ export default defineComponent({
             username: '',
             password: '',
         });
+        const githubLink = process.env.VUE_APP_GITHUB_LINK
         const uploading = ref(false)
         const onFinish = (values: any) => {
             uploading.value = true
@@ -81,6 +82,7 @@ export default defineComponent({
                 })
         }
         return {
+            githubLink,
             formState,
             uploading,
             onFinish,
