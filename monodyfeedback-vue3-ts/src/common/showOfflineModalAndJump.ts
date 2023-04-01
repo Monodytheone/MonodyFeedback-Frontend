@@ -1,7 +1,9 @@
 import router from '@/router';
 import { Modal } from 'ant-design-vue';
 
-/** 展示登录状态失效提示框并跳转至登录页面 */
+/** 展示登录状态失效提示框并跳转至登录页面 
+ * --这组数据太常用了，故专门提供一个预设好的函数
+*/
 export default function () {
     let secondsToGo = 5;
     let hasJumped: boolean = false  // 是否已经跳转过页面了
