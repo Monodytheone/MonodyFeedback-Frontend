@@ -7,6 +7,7 @@
         <div id="item-right">
             <p ref="itemRightRef">{{ statusString }}<van-icon name="arrow" size="17px" /></p>
         </div>
+        <div style="clear:both"></div>
     </div>
 </template>
 <script lang="ts">
