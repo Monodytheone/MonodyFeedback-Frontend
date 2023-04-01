@@ -1,4 +1,5 @@
 <template>
+    <div v-title data-title="Monody Feedback"></div>
     <div class="border-home">
 
         <Head />
@@ -9,7 +10,6 @@
     <div style="height: 1000px;"></div><!-- 添加1000像素的空内容 -->
 </template>
 <script lang="ts">
-import router from '@/router';
 import { defineComponent } from 'vue';
 import Head from './components/Head.vue';
 import ServiceProgress from './components/ServiceProcess.vue';

@@ -1,12 +1,10 @@
 import COS from 'cos-js-sdk-v5';
 import showOfflineModalAndJump from '@/common/showOfflineModalAndJump';
-import showErrorModal from '@/common/showErrorModal';
 
-/** submitter提交Paragraph图片的cos实例 */
 const cosSubmitIntance = new COS({
     /** @param options 获取临时密钥需要的参数对象 */
     getAuthorization: function (options, callback) {
-        var url = `${process.env.VUE_APP_SUBMIT_SERVICE_URL}/api/Submitter/AskPutPictureTempCredentialOfSubmitter`;
+        var url = `${process.env.VUE_APP_IDENTITY_SERVICE_URL}/api/Identity/AskChangeAvatarTempCredential`;
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
         xhr.setRequestHeader('authorization', `Bearer ${localStorage.getItem('jwt')}`)
@@ -16,12 +14,7 @@ const cosSubmitIntance = new COS({
                 var credentials = data.credentials;
             }
             catch (e) {
-                if (xhr.status == 403) {
-                    showErrorModal('403：您的账号不允许提交反馈哦')
-                }
-                else {
-                    showOfflineModalAndJump();  // 若获取临时密钥失败就是401了，跳转至登录界面
-                }
+                showOfflineModalAndJump();  // 若获取临时密钥失败就是401了，跳转至登录界面
             }
             if (!data || !credentials) {
                 return console.error('credentials invalid:\n' + JSON.stringify(data, null, 2))

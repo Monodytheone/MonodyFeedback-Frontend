@@ -1,5 +1,5 @@
 import axios from "axios";
-import showOfflineModalAndJump from "@/components/showOfflineModalAndJump";
+import showOfflineModalAndJump from "@/common/showOfflineModalAndJump";
 
 /** 带有Authorization请求头，并拦截401的实例 */
 const instanceWithAuthorizationAnd401Catch = axios.create({

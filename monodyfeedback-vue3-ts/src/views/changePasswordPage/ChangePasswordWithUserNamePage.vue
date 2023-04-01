@@ -1,45 +1,47 @@
+<!-- 在非登录状态下修改密码 -->
 <template>
-    <div v-title data-title="注册 - Monody Feedback"></div>
     <div id="displayRange">
         <a-form ref="formRef" name="custom-validation" :model="formState" :rules="rules" v-bind="layout"
             @finish="handleFinish" @validate="handleValidate" @finishFailed="handleFinishFailed">
-            <a-form-item id="userName" has-feedback label="用户名" name="username">
-                <a-input v-model:value="formState.userName" type="text" autocomplete="off" placeholder="3-18个字符" />
+            <a-form-item id="userName" label="用户名" name="username">
+                <a-input v-model:value="formState.username" type="text" placeholder="输入您的用户名" />
+            </a-form-item>
+
+            <a-form-item label="旧密码" name="oldPass">
+                <a-input v-model:value="formState.oldPass" type="password" placeholder="请输入旧密码" />
             </a-form-item>
 
             <!-- type="password" 会自动禁止输入奇奇怪怪的字符的 -->
-            <a-form-item has-feedback label="密码" name="pass">
+            <a-form-item has-feedback label="新密码" name="pass">
                 <a-input v-model:value="formState.pass" type="password" autocomplete="off"
                     placeholder="8-18个字符，必须含有小写字母和数字" />
             </a-form-item>
 
-            <a-form-item has-feedback label="确认密码" name="checkPass">
-                <a-input v-model:value="formState.checkPass" type="password" autocomplete="off" placeholder="确认密码" />
+            <a-form-item has-feedback label="确认新密码" name="checkPass">
+                <a-input v-model:value="formState.checkPass" type="password" autocomplete="off" placeholder="确认新密码" />
             </a-form-item>
 
             <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-                <a-button type="primary" html-type="submit" @click="handleSignUp">注册</a-button>
-                <a-button style="margin-left: 10px" @click="resetForm">重置</a-button>
+                <a-button type="primary" html-type="submit" :loading="changing" @click="handleChangePassword">{{ changing ? '修改中' :
+                    '修改密码' }}</a-button>
+                <a-button style="margin-left: 10px" :disabled="changing" @click="resetForm">重置</a-button>
             </a-form-item>
         </a-form>
     </div>
-
-    <!-- 遮罩层: -->
-    <Overlay :isShow="overlayIsShow" :message="'注册中...'"/>
 </template>
 <script lang="ts">
 import type { Rule } from 'ant-design-vue/es/form';
 import { defineComponent, reactive, ref } from 'vue';
 import type { FormInstance } from 'ant-design-vue';
-import checkUserNameUsability from '@/api/identityAPIs/checkUserNameUsability';
-import signUp from '@/api/identityAPIs/signUp';
 import showErrorModal from '../../common/showErrorModal';
-import showModalAndJump from '@/common/showModalAndJump';
 import Overlay from '@/components/Overlay.vue';
+import changePasswordWithUserName from '@/api/identityAPIs/changePasswordWithUserName';
+import showModalAndJump from '@/common/showModalAndJump';
 
 
 interface FormState {
-    userName: string;
+    username: string;  // 名称必须与<a-form-item>中的name相同，才可正常校验
+    oldPass: string;
     pass: string;
     checkPass: string;
 }
@@ -50,44 +52,31 @@ export default defineComponent({
     setup() {
         const formRef = ref<FormInstance>();
         const formState = reactive<FormState>({
-            userName: '',
+            username: '',
+            oldPass: '',
             pass: '',
             checkPass: '',
         });
-        const overlayIsShow = ref(false)
 
-        const handleSignUp = () => {
-            overlayIsShow.value = true
-            signUp(formState.userName, formState.pass)
+        const changing = ref(false)
+
+        const handleChangePassword = () => {
+            if(formState.username.length === 0) {
+                showErrorModal('请输入用户名')
+                return
+            }
+            if(formState.oldPass.length === 0) {
+                showErrorModal('请输入旧密码')
+                return
+            }
+            changing.value = true
+            changePasswordWithUserName(formState.username, formState.oldPass, formState.pass)   
                 .then(response => {
-                    overlayIsShow.value = false
-                    showModalAndJump(true, '/login', '注册成功', '登录页面', '去登录')
+                    showModalAndJump(true, '/login', '修改密码成功', '登录页面', '去登录')
                 })
                 .catch(error => {
-                    overlayIsShow.value = false
-                    showErrorModal(`${error.response.status}:  ${error.response.data}，请试着使用纯英文用户名？`)  // 后端会根据环境的不同来决定错误响应信息的详略
-                })
-        }
-
-        /** 用户名校验器 */
-        let validateUserName = async (_rule: Rule, value: string) => {
-            if (formState.userName.length === 0) {
-                return Promise.reject('请输入用户名')
-            }
-            else if (formState.userName.length < 3) {
-                return Promise.reject('用户名长度至少为3')
-            }
-            else if (formState.userName.length > 18) {
-                return Promise.reject('用户名长度不得大于18')
-            }
-            await checkUserNameUsability(formState.userName)  // 必须"等"收到响应
-                .then(response => {
-                    if ((response.data as boolean) === true) {
-                        return Promise.resolve();
-                    }
-                    else {
-                        return Promise.reject('用户名不可用')
-                    }
+                    showErrorModal(`${error.response.status}： ${error.response.data}`)
+                    changing.value = false
                 })
         }
 
@@ -125,9 +114,11 @@ export default defineComponent({
         };
 
         const rules: Record<string, Rule[]> = {
+            username: [{ required: true }],
+            oldPass: [{ required: true }],
             pass: [{ required: true, validator: validatePass, trigger: 'change' }],
-            checkPass: [{ validator: validatePass2, trigger: 'change' }],
-            username: [{ required: true, validator: validateUserName, trigger: 'change' }],
+            checkPass: [{ required: true, validator: validatePass2, trigger: 'change' }],
+            // username: [{ required: true, validator: validateUserName, trigger: 'change' }],
         };
         const layout = {
             labelCol: { span: 4 },
@@ -141,7 +132,7 @@ export default defineComponent({
         };
         const resetForm = () => {
             formRef.value?.resetFields();
-            formState.userName = ''
+            formState.username = ''
         };
         const handleValidate = (...args: any[]) => {
             console.log(args);
@@ -151,12 +142,12 @@ export default defineComponent({
             formRef,
             rules,
             layout,
-            overlayIsShow,
+            changing,
             handleFinishFailed,
             handleFinish,
             resetForm,
             handleValidate,
-            handleSignUp,
+            handleChangePassword,
         };
     },
 });

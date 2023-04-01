@@ -1,45 +1,44 @@
+<!-- 在登录状态下修改密码 -->
 <template>
-    <div v-title data-title="注册 - Monody Feedback"></div>
     <div id="displayRange">
         <a-form ref="formRef" name="custom-validation" :model="formState" :rules="rules" v-bind="layout"
             @finish="handleFinish" @validate="handleValidate" @finishFailed="handleFinishFailed">
-            <a-form-item id="userName" has-feedback label="用户名" name="username">
-                <a-input v-model:value="formState.userName" type="text" autocomplete="off" placeholder="3-18个字符" />
+
+            <a-form-item has-feedback label="旧密码" name="oldPass">
+                <a-input v-model:value="formState.oldPassword" type="password" autocomplete="off" placeholder="请输入旧密码" />
             </a-form-item>
 
             <!-- type="password" 会自动禁止输入奇奇怪怪的字符的 -->
-            <a-form-item has-feedback label="密码" name="pass">
+            <a-form-item has-feedback label="设置新密码" name="pass">
                 <a-input v-model:value="formState.pass" type="password" autocomplete="off"
                     placeholder="8-18个字符，必须含有小写字母和数字" />
             </a-form-item>
 
-            <a-form-item has-feedback label="确认密码" name="checkPass">
-                <a-input v-model:value="formState.checkPass" type="password" autocomplete="off" placeholder="确认密码" />
+            <a-form-item has-feedback label="确认新密码" name="checkPass">
+                <a-input v-model:value="formState.checkPass" type="password" autocomplete="off" placeholder="确认新密码" />
             </a-form-item>
 
             <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-                <a-button type="primary" html-type="submit" @click="handleSignUp">注册</a-button>
-                <a-button style="margin-left: 10px" @click="resetForm">重置</a-button>
+                <a-button type="primary" html-type="submit" :loading="uploading" @click="reset">{{ uploading ? '修改中' :
+                    '修改密码' }}</a-button>
+                <a-button style="margin-left: 10px" :disabled="uploading" @click="resetForm">重置</a-button>
             </a-form-item>
         </a-form>
     </div>
-
-    <!-- 遮罩层: -->
-    <Overlay :isShow="overlayIsShow" :message="'注册中...'"/>
 </template>
 <script lang="ts">
 import type { Rule } from 'ant-design-vue/es/form';
-import { defineComponent, reactive, ref } from 'vue';
+import { defineComponent, reactive, ref, onBeforeMount } from 'vue';
 import type { FormInstance } from 'ant-design-vue';
-import checkUserNameUsability from '@/api/identityAPIs/checkUserNameUsability';
-import signUp from '@/api/identityAPIs/signUp';
 import showErrorModal from '../../common/showErrorModal';
-import showModalAndJump from '@/common/showModalAndJump';
+import changePasswordWithJWT from '@/api/identityAPIs/changePasswordWithJWT';
 import Overlay from '@/components/Overlay.vue';
+import showModalAndJump from '@/common/showModalAndJump';
+import checkLoginStatusAndJumpToLoginPageIf401 from '@/common/checkLoginStatusAndJumpToLoginPageIf401';
 
 
 interface FormState {
-    userName: string;
+    oldPassword: string;
     pass: string;
     checkPass: string;
 }
@@ -48,46 +47,32 @@ export default defineComponent({
         Overlay,
     },
     setup() {
+        onBeforeMount(() => {
+            checkLoginStatusAndJumpToLoginPageIf401()
+        })
+
         const formRef = ref<FormInstance>();
         const formState = reactive<FormState>({
-            userName: '',
+            oldPassword: '',
             pass: '',
             checkPass: '',
         });
-        const overlayIsShow = ref(false)
+        const uploading = ref(false)
 
-        const handleSignUp = () => {
-            overlayIsShow.value = true
-            signUp(formState.userName, formState.pass)
+        const reset = () => {
+            if (formState.oldPassword.length === 0) {
+                showErrorModal('旧密码不得为空')
+                return
+            }
+            uploading.value = true
+            changePasswordWithJWT(formState.oldPassword, formState.pass)
                 .then(response => {
-                    overlayIsShow.value = false
-                    showModalAndJump(true, '/login', '注册成功', '登录页面', '去登录')
+                    uploading.value = false
+                    showModalAndJump(true, '/login', '登录成功', '登录界面', '去登录')
                 })
                 .catch(error => {
-                    overlayIsShow.value = false
-                    showErrorModal(`${error.response.status}:  ${error.response.data}，请试着使用纯英文用户名？`)  // 后端会根据环境的不同来决定错误响应信息的详略
-                })
-        }
-
-        /** 用户名校验器 */
-        let validateUserName = async (_rule: Rule, value: string) => {
-            if (formState.userName.length === 0) {
-                return Promise.reject('请输入用户名')
-            }
-            else if (formState.userName.length < 3) {
-                return Promise.reject('用户名长度至少为3')
-            }
-            else if (formState.userName.length > 18) {
-                return Promise.reject('用户名长度不得大于18')
-            }
-            await checkUserNameUsability(formState.userName)  // 必须"等"收到响应
-                .then(response => {
-                    if ((response.data as boolean) === true) {
-                        return Promise.resolve();
-                    }
-                    else {
-                        return Promise.reject('用户名不可用')
-                    }
+                    uploading.value = false
+                    showErrorModal(`${error.response.status}：${error.response.data}`)
                 })
         }
 
@@ -126,8 +111,7 @@ export default defineComponent({
 
         const rules: Record<string, Rule[]> = {
             pass: [{ required: true, validator: validatePass, trigger: 'change' }],
-            checkPass: [{ validator: validatePass2, trigger: 'change' }],
-            username: [{ required: true, validator: validateUserName, trigger: 'change' }],
+            checkPass: [{ required: true, validator: validatePass2, trigger: 'change' }],
         };
         const layout = {
             labelCol: { span: 4 },
@@ -141,7 +125,7 @@ export default defineComponent({
         };
         const resetForm = () => {
             formRef.value?.resetFields();
-            formState.userName = ''
+            formState.oldPassword = '';
         };
         const handleValidate = (...args: any[]) => {
             console.log(args);
@@ -151,12 +135,12 @@ export default defineComponent({
             formRef,
             rules,
             layout,
-            overlayIsShow,
+            uploading,
             handleFinishFailed,
             handleFinish,
             resetForm,
             handleValidate,
-            handleSignUp,
+            reset,
         };
     },
 });

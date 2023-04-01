@@ -15,6 +15,13 @@ import { Grid, GridItem } from 'vant';
 
 // createApp(App).use(router).mount('#app')
 const app = createApp(App)
+
+app.directive('title', {
+	mounted(el){
+		document.title = el.dataset.title
+	}
+})  // 页面title
+
 app.use(router)
 app.mount('#app')
 

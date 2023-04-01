@@ -1,9 +1,11 @@
 <!-- Vant照片墙 -->
 <template>
+    <div v-title data-title="更换头像 - Monody Feedback"></div>
     <div class="clearfix">
+        <router-link to="/">返回主界面</router-link><br><br>
         <a-upload accept=".png,.jpg,.jpeg,.webp" list-type="picture-card" :before-upload="beforeUpload"
             v-model:file-list="fileList" @preview="handlePreview" @remove="handleRemove">
-            <div v-if="fileList.length < 10">
+            <div v-if="fileList.length < 1">
                 <plus-outlined />
                 <div class="ant-upload-text">选择图片</div>
             </div>
@@ -11,16 +13,21 @@
         <a-modal :visible="previewVisible" :footer="null" @cancel="handleCancel">
             <img alt="example" style="width: 100%" :src="previewImage" />
         </a-modal>
+        <a-button type="primary" :disabled="fileList.length === 0" :loading="uploading" style="margin-top: 16px"
+            @click="handleUpload">{{ uploading ? '上传中' : '上传' }}</a-button>
     </div>
 </template>
 
 <script lang="ts">
 import { PlusOutlined } from '@ant-design/icons-vue';
-import { defineComponent, ref, watch } from 'vue';
+import { defineComponent, ref, onBeforeMount } from 'vue';
 import type { UploadProps } from 'ant-design-vue';
-import cosSubmitIntance from '@/api/instances/cosSubmitIntance';
-import { PictureInfo } from '@/api/submitAPIs/postSubmit';
 import { message } from 'ant-design-vue';
+import showErrorModal from '@/common/showErrorModal';
+import showModalAndJump from '@/common/showModalAndJump';
+import cosIdentityInstance from '@/api/instances/cosIdentityInstance';
+import checkLoginStatusAndJumpToLoginPageIf401 from '@/common/checkLoginStatusAndJumpToLoginPageIf401';
+import changeAvatarObjectKey from '@/api/identityAPIs/changeAvatarObjectKey';
 
 function getBase64(file: File) {
     return new Promise((resolve, reject) => {
@@ -57,11 +64,16 @@ export default defineComponent({
             required: true,
         }
     },
-    setup(props, { expose }) {
+    setup() {
+        checkLoginStatusAndJumpToLoginPageIf401()
+
+
         const previewVisible = ref<boolean>(false);
         const previewImage = ref<string | undefined>('');
 
         const fileList = ref<FileItem[]>([]);
+
+        const uploading = ref(false)
 
         const handleCancel = () => {
             previewVisible.value = false;
@@ -83,9 +95,9 @@ export default defineComponent({
             console.log(fileList)
 
 
-            const isLt2M = file.size / 1024 / 1024 < 10;
+            const isLt2M = file.size / 1024 / 1024 < 5;
             if (!isLt2M) {
-                message.error('你不能上传大于10MB的图片');
+                message.error('你不能上传大于5MB的图片');
             }
             return false;
         };
@@ -98,63 +110,52 @@ export default defineComponent({
             console.log(fileList)
         };
 
-        let uploadedPictureInfos: PictureInfo[] = []
-        let completedUploadNumber = ref(0)  // 已完成上传的数量（不论成功还是失败）
-        watch(completedUploadNumber, () => {  // 全部上传完毕后执行下一步动作，向后端提交Submission
-            if (completedUploadNumber.value === fileList.value.length) {
-                props.continueSubmit(uploadedPictureInfos)
-            }
-        })
-
-        /** 上传fileList中的全部图片 */
         const handleUpload = () => {
-            if (fileList.value.length === 0) {  // 若没有图片则直接执行下一步动作，向后端提交Submission
-                props.continueSubmit(uploadedPictureInfos)
-            }
-
+            uploading.value = true
             const checkFileType = (fileName: string) => {
                 if (fileName.endsWith('.png') || fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.webp')) {
                     return true
                 }
                 else return false
             }
-            for (let index = 0; index < fileList.value.length; index++) {
-                let file = fileList.value[index]
-                if (checkFileType(file.name as string) == false) {
-                    console.error(`图 ${index + 1} 错误：只允许上传图片`)
-                    completedUploadNumber.value += 1
-                    continue
-                }
-                // 禁止大于10MB的图片上传
-                if (file.originFileObj.size / 1024 / 1024 > 10) {
-                    console.error(`图 ${index + 1} 大于10MB`)
-                    completedUploadNumber.value += 1
-                    continue
-                }
-                let bucket = process.env.VUE_APP_COS_PICTURE_BUCKET;
-                let region = process.env.VUE_APP_COS_PICTURE_REGION;
-                let fullObjectKey = `${process.env.VUE_APP_COS_PICTURE_FOLDER}/${localStorage.getItem('submitterId')}/${file.uid}.png`;  // id记得用小写字母
-                cosSubmitIntance.putObject({
-                    Bucket: bucket,
-                    Region: region,
-                    Key: fullObjectKey,  // id记得用小写字母
-                    Body: file.originFileObj,
-                    onProgress: function (progressData) {
-                    }
-                }, function (err, data) {
-                    completedUploadNumber.value += 1
-                    console.log(err || data);
-                    if (data.statusCode as number < 400) {
-                        console.log('push')
-                        uploadedPictureInfos.push(new PictureInfo(bucket, region, fullObjectKey))
-                    }
-                })
+
+            const file = fileList.value[0];
+            if (checkFileType(file.name as string) === false) {
+                showErrorModal('仅允许上传png, jpg, webp格式的图片')
             }
+            if (file.originFileObj.size / 1024 / 1024 > 5) {
+                showErrorModal('仅允许上传小于5MB的图片')
+            }
+            const fullObjectKey = `${process.env.VUE_APP_COS_AVATAR_FOLDER}/${localStorage.getItem('submitterId')}.png`
+
+            cosIdentityInstance.putObject({
+                Bucket: process.env.VUE_APP_COS_AVATAR_BUCKET,
+                Region: process.env.VUE_APP_COS_AVATAR_REGION,
+                Key: fullObjectKey,
+                Body: file.originFileObj,
+                onProgress() {
+
+                }
+            }, function (err, data) {
+                uploading.value = false
+                console.log(err || data);
+                if (data.statusCode as number >= 400) {
+                    showErrorModal('上传失败')
+                }
+                else {   // 上传成功后，向后端发请求更新该用户头像的对象键
+                    changeAvatarObjectKey(fullObjectKey)
+                        .then(response => {
+                            showModalAndJump(true, '/', '设置头像成功', '主界面', '确定')
+                        })
+                        .catch(error => {
+                            showErrorModal(`${error.response.status}： ${error.response.data}`)
+                        })
+                }
+            })
         };
 
-        expose({ handleUpload })  // 暴露出去，供父级组件调用来上传图片
-
         return {
+            uploading,
             previewVisible,
             previewImage,
             fileList,
@@ -178,6 +179,10 @@ export default defineComponent({
 .ant-upload-select-picture-card .ant-upload-text {
     margin-top: 8px;
     color: #666;
+}
+
+.clearfix {
+    margin: 150px 0 0;
 }
 </style>
   

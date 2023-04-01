@@ -14,7 +14,8 @@
     "cos-js-sdk-v5": "^1.4.16",
     "vant": "^4.1.0",
     "vue": "^3.2.13",
-    "vue-router": "^4.0.3"
+    "vue-router": "^4.0.3",
+    "xdatetime": "^1.4.7"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.4.0",
