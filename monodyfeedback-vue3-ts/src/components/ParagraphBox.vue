@@ -26,15 +26,7 @@ export default defineComponent({
     },
     setup(props) {
         const activeKey = ref(['1']);
-        // const isRight = props.sentBySubmitter === props.showForSubmitter  // 是否处于右侧（自己发的内容处于右侧，对方发的内容处于左侧）
-        // const isRight = (false) === props.showForSubmitter
-        const isRight = (props.sender == ParagraphSender.Submitter) === props.showForSubmitter
-        // if(props.sender != ParagraphSender.System) {
-        //     collapseStyle = isRight ? 'margin-left: 100px; text-align: left' : 'margin-right: 100px; text-align: left'
-        // }
-        // else {
-        //     collapseStyle = 'margin-left: 50px; margin-right: 50px;'
-        // }
+        const isRight = (props.sender == ParagraphSender.Submitter) === props.showForSubmitter  // 是否处于右侧（自己发的内容处于右侧，对方发的内容处于左侧）
         let collapseStyle = isRight ? 'margin-left: 100px; text-align: left' : 'margin-right: 100px; text-align: left'
         const timeText = props.time.toString('yyyy-MM-dd hh:mm:ss')
         let fontColorStyle = isRight ? 'color: gray' : '';  // 若处于右侧，则字体颜色置灰
@@ -47,7 +39,8 @@ export default defineComponent({
             headerText = `${props.showForSubmitter ? '客服，回复于：' : `${props.submitterName}，提交于：`}${timeText}`
         }
 
-        if(props.sender == ParagraphSender.System) {
+        // 系统发的消息，居中且不置灰
+        if (props.sender == ParagraphSender.System) {
             collapseStyle = 'margin-left: 60px; margin-right: 60px;'
             headerText = `系统，发送于：${timeText}`
             fontColorStyle = ''

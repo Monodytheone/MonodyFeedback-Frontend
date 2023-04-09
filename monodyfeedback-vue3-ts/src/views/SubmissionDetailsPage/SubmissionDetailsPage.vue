@@ -13,7 +13,7 @@
                 </div>
                 <ParagraphBox v-for="(paragraph) in submissionDetails.Paragraphs" :time="paragraph.CreationTime"
                     :textContent="paragraph.TextContent" :pictureUrls="paragraph.PictureUrls"
-                    :sentBySubmitter="paragraph.Sender === 'Submitter' ? true : false" :showForSubmitter="true" />
+                    :sender="parseSender(paragraph.Sender)" :showForSubmitter="true" />
 
                 <div style="margin-top: 40px;" />
 
@@ -70,6 +70,7 @@ import ParagraphBox from '@/components/ParagraphBox.vue';
 import SupplementBox from './components/SupplementBox.vue';
 import EvaluateBox from './components/EvaluateBox.vue';
 import Evaluation from './components/Evaluation.vue';
+import ParagraphSender from '@/types/ParapraphSender';
 export default defineComponent({
     components: {
         ParagraphBox,
@@ -131,10 +132,23 @@ export default defineComponent({
             }
         }
 
+        /** 将Sender字符串转为枚举，用于给ParagraphBox组件传Sender参数（设计得这么奇怪是因为之前忘了考虑发送者是System的情况，暂时不想大改故如此了） */
+        const parseSender = (senderString: string): ParagraphSender => {
+            switch (senderString) {
+                case 'Submitter':
+                    return ParagraphSender.Submitter
+                case 'Processor':
+                    return ParagraphSender.Processor
+                case 'System':
+                default:
+                    return ParagraphSender.System
+            }
+        }
 
         return {
             statusString, submitterId,
             submissionDetails,
+            parseSender,
         }
     }
 })

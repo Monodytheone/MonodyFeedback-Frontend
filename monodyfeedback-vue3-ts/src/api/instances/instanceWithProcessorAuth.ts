@@ -1,4 +1,3 @@
-import showModalAndJump from '@/common/showModalAndJump';
 import axios from 'axios';
 
 const instanceWithProccessorAuth = axios.create({
