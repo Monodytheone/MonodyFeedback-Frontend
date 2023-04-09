@@ -46,7 +46,8 @@ export default defineComponent({
         })
         function logout() {
             logoutAPI()
-            localStorage.clear()
+            // localStorage.removeItem('jwt')  // 别删这一项，要不logout请求带不上jwt了，反正是无效的jwt，留着就留着吧
+            localStorage.removeItem('submitterId')
             location.reload()  // 刷新页面
         }
         function jumpToLoginPage() {

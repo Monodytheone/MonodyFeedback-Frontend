@@ -6,7 +6,7 @@
             <p id="header">共{{ submissionInfos.length }}个问题，{{ numOfToBeSupplemented }}个请完善，{{ numOfToBeEvaluated }}个待评价</p>
         </a-affix>
         <div id="list">
-            <SubmissionItem v-for="(info) in submissionInfos" :info="info" />
+            <SubmissionItem v-for="(info) in submissionInfos" :info="info" :isShownForSubmitter="true"/>
             <p id="list-bottomText">暂无更多纪录</p>
         </div>
 
@@ -91,7 +91,7 @@ export default defineComponent({
     height: 10vh;
     padding: 6vh 0 10px;
     margin-bottom: 0;
-    border-bottom: 1px black solid;
+    border-bottom: 1px #cccccc solid;
     color: rgb(220, 181, 81);
     background-color: white;
     font-size: 2vh;
@@ -99,7 +99,7 @@ export default defineComponent({
 
 #bottom-div {
     height: 7vh;
-    border-top: 1px black solid;
+    border-top: 1px #cccccc solid;
     background-color: white;
 }
 

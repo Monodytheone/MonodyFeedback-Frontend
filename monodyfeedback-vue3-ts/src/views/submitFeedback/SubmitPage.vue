@@ -28,7 +28,7 @@
 
         <div class="feedbackBox">
             <label>图片上传<span id="imgUploadTip">（最多上传10张图片，10MB以下）</span></label>
-            <Pics :continueSubmit="continueSubmit" ref="pics" />
+            <Pics ref="pics" :continueSubmit="continueSubmit" />
             <div class="clearfix"></div>
         </div>
 
@@ -49,7 +49,8 @@ import Pics from './components/Pics.vue';
 import BackToHome from './components/BackToHome.vue';
 import showErrorModal from '../../common/showErrorModal';
 import showModalAndJump from '@/common/showModalAndJump';
-import { postSubmit, PictureInfo } from '@/api/submitAPIs/postSubmit';
+import { postSubmit } from '@/api/submitAPIs/postSubmit';
+import PictureInfo from '@/types/PictureInfo';
 import Overlay from '@/components/Overlay.vue';
 import checkLoginStatusAndJumpToLoginPageIf401 from '@/common/checkLoginStatusAndJumpToLoginPageIf401';
 
@@ -66,14 +67,8 @@ export default defineComponent({
         const problemDescription = ref('')
         const email = ref('')
         const telNumber = ref('')
-        // const pics = ref()
         const pics = ref<InstanceType<typeof Pics>>(); // 这么写有提示
         const overlayIsShow = ref(false)  // 遮罩层是否显示
-
-        /** 调用子级组件的方法，上传图片 */
-        const picsUpload = () => {
-            pics.value?.handleUpload()
-        }
 
         function test_showDescription() {
             console.log(problemDescription.value, email.value, telNumber.value)
@@ -152,7 +147,7 @@ export default defineComponent({
             problemDescription, email, telNumber,
             problemDescWarnIsShow, emailWarnIsShow, telWarnIsShow,
             pics, overlayIsShow,
-            test_showDescription, picsUpload, submit, continueSubmit,
+            test_showDescription, submit, continueSubmit,
         }
     }
 })
@@ -208,18 +203,23 @@ input {
 
 #submitButton {
     position: fixed;
+    /* padding: 0.3vh 80px; */
     bottom: 20px;
     right: 48%;
+    background-color: #393b40;
+    color: #f4d8a8;
+    border: none;
+    border-radius: 0.5vh;
 }
 
 /* 输入数据不合格式时黄色边框警告 */
 .warningInput {
-    border: 2px #d9df5b solid;
+    border: 1px #dcbc60 solid;
 }
 
 .warnText {
     float: left;
     font-size: 12px;
-    color: #b4ba40;
+    color: #dcbc60;
 }
 </style>
