@@ -5,7 +5,7 @@
         <a-form :model="formState" name="basic" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }" autocomplete="off"
             @finish="onFinish" @finishFailed="onFinishFailed">
             <a-form-item label="用户名" name="username" :rules="[{ required: true, message: '请输入用户名' }]">
-                <a-input v-model:value="formState.username" />
+                <a-input v-model:value="formState.username" autofocus />
             </a-form-item>
 
             <a-form-item label="密码" name="password" :rules="[{ required: true, message: '请输入密码' }]">
@@ -15,7 +15,8 @@
             <a :href="githubLink" target="_blank">前往项目GitHub主页，获取试用处理者账号</a>
 
             <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-                <a-button id="button" type="primary" html-type="submit" :loading="uploading">{{ uploading ? '登录中' : '登录' }}</a-button>
+                <a-button id="button" type="primary" html-type="submit" :loading="uploading">{{ uploading ? '登录中' : '登录'
+                }}</a-button>
             </a-form-item>
         </a-form>
     </div>
@@ -48,9 +49,9 @@ export default defineComponent({
                 })
                 .catch(error => {
                     uploading.value = false
-                    if(error.response.status == 423) {
+                    if (error.response.status == 423) {
                         showErrorModal('账号被锁定，请联系管理员')
-                        
+
                         return
                     }
                     showErrorModal(error.response.data)  // 弹出失败提示框
@@ -65,19 +66,19 @@ export default defineComponent({
         const checkRole = () => {
             getProcessorInfo()
                 .then(response => {
-                    showModalAndJump(true, '', '登录成功', '处理者主页', '确定')                    
+                    showModalAndJump(true, '/processor/problems', '登录成功', '处理者主页', '确定')
                 })
                 .catch(error => {
                     uploading.value = false
                     localStorage.removeItem("processorJWT")
-                    if(error.response.status == 403) {
+                    if (error.response.status == 403) {
                         showErrorModal('请使用处理者账号登录')
                     }
-                    else if(error.response.status == 401) {
+                    else if (error.response.status == 401) {
                         showErrorModal('登录失败')
                     }
                     else {
-                        showErrorModal(`${error.response.status}：${error.response.data}:::`)
+                        showErrorModal(`${error.response.status}：${error.response.data}`)
                     }
                 })
         }
@@ -114,10 +115,9 @@ a {
     margin-left: 80px;
 }
 
-#button{
+#button {
     margin-top: 20px;
 }
-
 </style>
   
   

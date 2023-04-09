@@ -10,7 +10,7 @@ import { Overlay } from 'vant';
 // Vant:
 import { Icon } from 'vant';
 import { Grid, GridItem } from 'vant';
-
+import { Tab, Tabs } from 'vant';
 
 
 // createApp(App).use(router).mount('#app')
@@ -33,5 +33,5 @@ app.use(Icon);
 app.use(Grid);
 app.use(GridItem);
 app.use(Overlay);
-
-
+app.use(Tab);
+app.use(Tabs);

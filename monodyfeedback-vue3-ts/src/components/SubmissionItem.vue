@@ -1,5 +1,5 @@
 <template>
-    <div id="item-area">
+    <div id="item-area" @click="jumpToDetailsPage">
         <div id="item-left">
             <p>{{ info.Describe }}</p>
             <p id="time">{{ info.LastInteractionTime.toString('yyyy-MM-dd hh:mm:ss') }}</p>
@@ -14,11 +14,16 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import SubmissionStatus from '@/types/SubmissionStatus';
 import SubmissionInfo from '@/types/SubmissionInfo';
+import router from '@/router';
 
 export default defineComponent({
     props: {
         info: {
             type: SubmissionInfo,
+            required: true,
+        },
+        isShownForSubmitter: {
+            type: Boolean,
             required: true,
         }
     },
@@ -30,7 +35,7 @@ export default defineComponent({
             switch (props.info.Status) {
                 case SubmissionStatus.toBeAssigned:
                 case SubmissionStatus.toBeProcessed:
-                    statusString.value = '待处理'  // 不给提交者展示‘待分配’状态
+                    statusString.value = '待处理'  // 不给提交者展示‘待分配’状态；处理者的Submission不可能有‘待分配’状态
                     itemRightRef.value.style.color = 'gray'
                     break;
 
@@ -38,10 +43,9 @@ export default defineComponent({
                     statusString.value = '已关闭'
                     itemRightRef.value.style.color = 'gray'
                     break;
-
+ 
                 case SubmissionStatus.toBeEvaluated:
                     statusString.value = '待评价'
-                    // itemRightRef.value.style.color = 'rgb(47, 164, 210)'
                     itemRightRef.value.style.color = '#5cabee'
                     break;
 
@@ -51,9 +55,19 @@ export default defineComponent({
                     break;
             }
         })
+
+        const jumpToDetailsPage = () => {
+            if (props.isShownForSubmitter) {
+                router.push(`/progress/submission?subid=${props.info.Id}`)
+            }
+            else {
+                router.push(`/processor/problems/submission?subid=${props.info.Id}`)
+            }
+        }
         return {
             itemRightRef,
             statusString,
+            jumpToDetailsPage,
         }
     }
 })
@@ -63,7 +77,7 @@ export default defineComponent({
     background-color: #fbfaf9;
     height: 50px;
     margin: 15px 0;
-    border: 1px rgb(197, 190, 190) solid;
+    border: 1px #cccccc solid;
     border-radius: 3px;
     /* 鼠标移入变小手： */
     cursor: pointer;

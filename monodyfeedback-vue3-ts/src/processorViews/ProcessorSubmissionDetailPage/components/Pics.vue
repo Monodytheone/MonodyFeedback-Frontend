@@ -18,7 +18,7 @@
 import { PlusOutlined } from '@ant-design/icons-vue';
 import { defineComponent, ref, watch } from 'vue';
 import type { UploadProps } from 'ant-design-vue';
-import cosSubmitIntance from '@/api/instances/cosSubmitIntance';
+import cosProcessorInstance from '@/api/instances/cosProcessorInstance';
 import PictureInfo from '@/types/PictureInfo';
 import { message } from 'ant-design-vue';
 
@@ -52,10 +52,8 @@ export default defineComponent({
         PlusOutlined,
     },
     props: {
-        continueSubmit: {
-            type: Function,
-            required: true,
-        }
+        continueSubmit: { type: Function, required: true },
+        submitterId: { type: String, required: true },
     },
     setup(props, { expose }) {
         const previewVisible = ref<boolean>(false);
@@ -133,8 +131,8 @@ export default defineComponent({
                 }
                 let bucket = process.env.VUE_APP_COS_PICTURE_BUCKET;
                 let region = process.env.VUE_APP_COS_PICTURE_REGION;
-                let fullObjectKey = `${process.env.VUE_APP_COS_PICTURE_FOLDER}/${localStorage.getItem('submitterId')}/${file.uid}.png`;  // id记得用小写字母
-                cosSubmitIntance.putObject({
+                let fullObjectKey = `${process.env.VUE_APP_COS_PICTURE_FOLDER}/${props.submitterId}/${file.uid}.png`;  // 处理者回复的图片也传到提交者专属的哪个文件夹里
+                cosProcessorInstance.putObject({
                     Bucket: bucket,
                     Region: region,
                     Key: fullObjectKey,  // id记得用小写字母

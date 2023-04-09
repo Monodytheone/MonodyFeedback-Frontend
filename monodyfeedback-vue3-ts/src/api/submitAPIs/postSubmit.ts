@@ -1,17 +1,5 @@
 import instanceWithAuthorizationAnd401Catch from "../instances/instanceWithAuthorizationAnd401Catch";
-
-
-export class PictureInfo {
-    bucketName: string;
-    region: string;
-    fullObjectKey: string;
-
-    constructor(bucketName: string, region: string, fullObjectKey: string) {
-        this.bucketName = bucketName;
-        this.region = region;
-        this.fullObjectKey = fullObjectKey;
-    }
-}
+import PictureInfo from "@/types/PictureInfo";
 
 export const postSubmit = (telNumber: string | null, email: string | null, textContent: string, pictureInfos: PictureInfo[]) => {
     return instanceWithAuthorizationAnd401Catch({

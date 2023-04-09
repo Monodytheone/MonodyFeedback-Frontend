@@ -39,14 +39,36 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/changePasswordWithUserNamePage',
-    name: 'ChangePasswordWithUserNamePagee',
+    name: 'ChangePasswordWithUserNamePage',
     component: () => import('@/views/changePasswordPage/ChangePasswordWithUserNamePage.vue'),
+  },
+  {
+    path: '/progress/submission',
+    name: 'SubmissionDetialPage',
+    component: () => import('@/views/SubmissionDetailsPage/SubmissionDetailsPage.vue'),
+    props: route => ({
+      submissionId: route.query.subid
+    })
+  },
+  {
+    path: '/processor/problems/submission',
+    name: 'ProcessorSubmissionDetialPage',
+    component: () => import('@/processorViews/ProcessorSubmissionDetailPage/ProcessorSubmissionDetailPage.vue'),
+    props: route => ({
+      submissionId: route.query.subid
+    })
   },
   {
     path: '/processor',
     name: 'ProcessorHome',
     component: () => import('@/processorViews/home/ProcessorHome.vue'),
-  }
+  },
+  {
+    path: '/processor/problems',
+    name: 'ProblemListPage',
+    component: () => import('@/processorViews/ProblemListsPage/ProblemListPage.vue'),
+    props: route => ({activeNumber: route.query.active})
+  },
 ]
 
 const router = createRouter({
