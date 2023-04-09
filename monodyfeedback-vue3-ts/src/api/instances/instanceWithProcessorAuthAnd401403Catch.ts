@@ -2,7 +2,7 @@ import axios from "axios";
 import showOfflineModalAndJump from "@/common/showOfflineModalAndJump";
 import showModalAndJump from "@/common/showModalAndJump";
 
-/** 带有Authorization请求头，并拦截401的实例 */
+/** 带有Processor的JWT的请求头，并拦截401和403的实例 */
 const instanceWithProcessorAuthAnd401403Catch = axios.create({
     timeout: 10000,
 })
@@ -30,7 +30,7 @@ instanceWithProcessorAuthAnd401403Catch.interceptors.response.use(
         }
         else if(error.response.status == 403) {
             showModalAndJump(false, '/processor', '你访问了你不配访问的方法，给你个机会重新登录', '处理者登录页面', '我错了')
-            // 需要记录到日志
+            // 危险行为，需要记录到日志
             return
         }
         return Promise.reject(error);

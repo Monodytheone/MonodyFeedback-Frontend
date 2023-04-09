@@ -34,7 +34,7 @@ export default defineComponent({
             })
             .catch(error => {
                 // 本API的所有报错都意味着用户的非法操作，应该记录甚至封号
-                showErrorModal("你不应该试图进行不该做行为")
+                showErrorModal("你不应该试图进行此行为")
             })
 
         return {

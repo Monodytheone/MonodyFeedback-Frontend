@@ -17,7 +17,6 @@ import { PropType } from 'vue';
 export default defineComponent({
     props: {
         time: { type: DateTime, required: true, },
-        // sentBySubmitter: { type: Boolean, required: true, },
         sender: { type: Number as PropType<ParagraphSender>, required: true },
         showForSubmitter: { type: Boolean, required: true, },
         textContent: { type: String, required: true, },

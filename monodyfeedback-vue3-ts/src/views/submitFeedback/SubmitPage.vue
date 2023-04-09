@@ -203,7 +203,6 @@ input {
 
 #submitButton {
     position: fixed;
-    /* padding: 0.3vh 80px; */
     bottom: 20px;
     right: 48%;
     background-color: #393b40;
