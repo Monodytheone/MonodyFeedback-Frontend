@@ -34,7 +34,7 @@
 
             <van-tab title="已关闭">
                 <div class="list">
-                    <ListInStatus :status="4" />
+                    <PaginationListInStatus :status="4"/>
                 </div>
             </van-tab>
         </van-tabs>
@@ -51,14 +51,14 @@ import getUnassignedNumber from '@/api/processAPIs/getUnassignedNumber'
 import showErrorModal from '@/common/showErrorModal';
 import ToBeProcessedList from './components/ToBeProcessedList.vue';
 import ListInStatus from './components/ListInStatus.vue';
-import { watch } from 'vue';
-import { watchEffect } from 'vue';
+import PaginationListInStatus from './components/PaginationListInStatus.vue';
 
 export default defineComponent({
     components: {
         ServicesWrap,
         ToBeProcessedList,
         ListInStatus,
+        PaginationListInStatus,
     },
     props: {
         activeNumber: { type: Number, required: false }

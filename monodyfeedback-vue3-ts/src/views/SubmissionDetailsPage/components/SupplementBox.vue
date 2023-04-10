@@ -16,7 +16,6 @@ import { defineComponent, ref } from 'vue';
 import Overlay from '@/components/Overlay.vue';
 import showErrorModal from '@/common/showErrorModal';
 import PictureInfo from '@/types/PictureInfo';
-import SubmissionStatus from '@/types/SubmissionStatus';
 import supplement from '@/api/submitAPIs/supplement';
 import showModalAndJump from '@/common/showModalAndJump';
 import Pics from './Pics.vue';
