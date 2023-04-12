@@ -67,7 +67,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/processor/problems',
     name: 'ProblemListPage',
     component: () => import('@/processorViews/ProblemListsPage/ProblemListPage.vue'),
-    props: route => ({activeNumber: route.query.active})
+    props: route => ({activeName: route.query.active})
   },
 ]
 

@@ -6,7 +6,7 @@
             <p id="header">共{{ submissionInfos.length }}个问题，{{ numOfToBeSupplemented }}个请完善，{{ numOfToBeEvaluated }}个待评价</p>
         </a-affix>
         <div id="list">
-            <SubmissionItem v-for="(info) in submissionInfos" :info="info" :isShownForSubmitter="true"/>
+            <SubmissionItem v-for="(info) in submissionInfos" :info="info" :isShownForSubmitter="true" :key="keyNum" />
             <p id="list-bottomText">暂无更多纪录</p>
         </div>
 
@@ -18,7 +18,7 @@
     </div>
 </template>
 <script lang="ts">
-import { defineComponent, onBeforeMount, reactive, computed } from 'vue';
+import { defineComponent, onBeforeMount, reactive, computed, onMounted, onBeforeUnmount, ref } from 'vue';
 import checkLoginStatusAndJumpToLoginPageIf401 from '@/common/checkLoginStatusAndJumpToLoginPageIf401';
 import SubmissionItem from '@/components/SubmissionItem.vue';
 import SubmissionInfo from '@/types/SubmissionInfo';
@@ -26,6 +26,14 @@ import DateTime from 'xdatetime';
 import SubmissionStatus from '@/types/SubmissionStatus';
 import getSubmissionInfosOfSubmitter from '@/api/submitAPIs/getSubmissionInfosOfSubmitter';
 import router from '@/router';
+import { message } from 'ant-design-vue';
+import * as signalR from '@microsoft/signalr';
+import { IHttpConnectionOptions } from '@microsoft/signalr';
+let connection: signalR.HubConnection | null;  // 到SignalR服务器的连接
+
+interface reacInfos {
+    infos: SubmissionInfo[]
+}
 
 export default defineComponent({
     components: {
@@ -33,7 +41,7 @@ export default defineComponent({
     },
     setup() {
         checkLoginStatusAndJumpToLoginPageIf401()
-
+        const keyNum = ref(0)
         const submissionInfos = reactive<SubmissionInfo[]>([]);
         const numOfToBeEvaluated = computed(() => {
             return submissionInfos.reduce((pre, info, index) => pre + (info.Status == SubmissionStatus.toBeEvaluated ? 1 : 0), 0)
@@ -57,6 +65,57 @@ export default defineComponent({
                 })
         })
 
+        onMounted(async function () {
+            const token = localStorage.getItem("jwt")
+            var options = {
+                skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets,  // 禁用协商
+                accessTokenFactory: () => token  // 使请求的时候url带上accessToken
+            };
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl(process.env.VUE_APP_SUBMITER_SIGNALR_URL, options as IHttpConnectionOptions)
+                .withAutomaticReconnect()  // 自动重连
+                .build();
+            await connection.start()
+
+            connection.on("SubmissionToBeSupplemented", receivedMessage => {
+                message.info('你有新的待完善问题')
+                let receivedSubmissionInfo = new SubmissionInfo(receivedMessage.id, receivedMessage.describe,
+                    new DateTime(receivedMessage.lastInteractionTime), receivedMessage.status);
+                spliceAndUnshiftOnSubmissionInfos(receivedSubmissionInfo);
+            });
+
+            connection.on("SubmissionToBeEvaluated", receivedMessage => {
+                message.info("你有新的待评价问题")
+                let receivedSubmissionInfo = new SubmissionInfo(receivedMessage.id, receivedMessage.describe,
+                    new DateTime(receivedMessage.lastInteractionTime), receivedMessage.status);
+                spliceAndUnshiftOnSubmissionInfos(receivedSubmissionInfo);
+            })
+        })
+
+        /** 移除旧条目，插入新条目 */
+        const spliceAndUnshiftOnSubmissionInfos = (receivedSubmissionInfo: SubmissionInfo) => {
+            // 找出此项SubmissionInfo在数组中的索引
+            let index = -1
+            for (let i = 0; i < submissionInfos.length; i++) {
+                if (submissionInfos[i].Id.toLowerCase() == receivedSubmissionInfo.Id) {
+                    index = i
+                    break
+                }
+            }
+
+            // 若元素存在于数组中，移除之
+            if (index !== -1) {
+                submissionInfos.splice(index, 1)
+            }
+
+            submissionInfos.unshift(receivedSubmissionInfo)// 在数组首部插入新的SubmissionInfo
+            keyNum.value++  // 更新key，强制子组件刷新
+        }
+
+        onBeforeUnmount(() => {
+            connection?.stop()  // 退出界面时断开SignalR连接
+        })
+
         const jumpToSumitPage = () => {
             router.push('/submit')
         }
@@ -66,6 +125,7 @@ export default defineComponent({
             numOfToBeEvaluated,
             numOfToBeSupplemented,
             jumpToSumitPage,
+            keyNum,
         }
     }
 })

@@ -103,7 +103,6 @@ export default defineComponent({
 #item-right {
     float: right;
     padding: 12px 10px 0 0;
-    color: rgb(69, 150, 183);
     color: rgb(25, 180, 241)
 }
 </style>

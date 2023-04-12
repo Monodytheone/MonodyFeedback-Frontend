@@ -13,28 +13,28 @@
         </div>
 
         <van-tabs v-model:active="active">
-            <van-tab title="待处理" :dot="true">
+            <van-tab title="待处理" name="a" :dot="true">
                 <div class="list">
                     <ToBeProcessedList :getNumber="getNumber" ref="toBeProcessedListRef" v-if="processorName.length != 0"
                         :enableAssignButton="enableAssignButton" />
                 </div>
             </van-tab>
 
-            <van-tab title="待完善">
+            <van-tab title="待完善" name="b">
                 <div class="list">
                     <ListInStatus :status="2" />
                 </div>
             </van-tab>
 
-            <van-tab title="待评价">
+            <van-tab title="待评价" name="c">
                 <div class="list">
                     <ListInStatus :status="3" />
                 </div>
             </van-tab>
 
-            <van-tab title="已关闭">
+            <van-tab title="已关闭" name="d">
                 <div class="list">
-                    <PaginationListInStatus :status="4"/>
+                    <PaginationListInStatus :status="4" />
                 </div>
             </van-tab>
         </van-tabs>
@@ -42,7 +42,7 @@
     </div>
 </template>
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watchEffect } from 'vue';
 import ServicesWrap from '@/views/home/components/ServicesWrap.vue';
 import getProcessorInfo from '@/api/identityAPIs/getProcessorInfo';
 import showModalAndJump from '@/common/showModalAndJump';
@@ -61,11 +61,13 @@ export default defineComponent({
         PaginationListInStatus,
     },
     props: {
-        activeNumber: { type: Number, required: false }
+        activeName: { type: String, required: false }
     },
     setup(props) {
         const processorName = ref('')
         const claimButtonIsDisabled = ref(false)
+        const active = ref('a');
+        active.value = props.activeName !== undefined ? props.activeName : 'a'
         getProcessorInfo()
             .then(response => {
                 processorName.value = response.data.userName
@@ -76,15 +78,7 @@ export default defineComponent({
                 if (statusCode == 401) {
                     showModalAndJump(false, '/processor', '登录失效，请重新登录', '处理者登录页面', '去登录')
                 }
-            })
-
-        const active = ref(0);
-        // 亟待解决：无法根据路由参数确定默认显示的标签
-        // watchEffect(() => {
-        //     if (props.activeNumber != undefined) {
-        //         active.value = props.activeNumber
-        //     }
-        // })
+            });
 
         const unassignedNumber = ref<Number>()
         const getNumber = () => getUnassignedNumber()
