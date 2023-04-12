@@ -102,12 +102,10 @@ export default defineComponent({
                     break
                 }
             }
-
             // 若元素存在于数组中，移除之
             if (index !== -1) {
                 submissionInfos.splice(index, 1)
             }
-
             submissionInfos.unshift(receivedSubmissionInfo)// 在数组首部插入新的SubmissionInfo
             keyNum.value++  // 更新key，强制子组件刷新
         }

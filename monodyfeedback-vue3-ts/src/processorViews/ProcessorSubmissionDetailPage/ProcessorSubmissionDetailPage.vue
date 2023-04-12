@@ -3,16 +3,27 @@
     <div class="background">
         <div class="whiteBackground">
             <div id="displayRange">
-                <div id="submitterInfo">
-                    <h4>手机号：{{ tel == null ? '未填写' : tel }}</h4>
-                    <h4>邮箱：{{ email == null ? '未填写' : email }}</h4>
-                </div>
+                <a-affix :offset-top="0">
+                    <div class="header">
+                        <router-link id="backLink" :to="`/processor/problems?active=${backTabName}`">
+                            <van-icon name="arrow-left" :size="17" />
+                            返回{{ backTabStatusString }}列表
+                        </router-link>
+                        <div id="submitterInfo">
+                            <h4>手机号：{{ tel == null ? '未填写' : tel }}</h4>
+                            <h4>邮箱：{{ email == null ? '未填写' : email }}</h4>
+                        </div>
+                        <div style="clear: both" />
+                    </div>
+                </a-affix>
+
                 <div class="subTitle">
                     <p>
                         <van-icon name="question-o" color="#dcbc60" size="20" />
                         <b>当前状态：{{ statusString }}</b>
                     </p>
                 </div>
+
                 <div class="subTitle">
                     <p>
                         <van-icon name="chat-o" color="#dcbc60" size="20" />
@@ -24,6 +35,7 @@
                     :sender="parseSender(paragraph.Sender)" :submitterName="submitterName" />
 
                 <div style="margin-top: 40px;" />
+
                 <div v-if="submissionDetails.Status == 1">
                     <div class="subTitle">
                         <p>
@@ -81,6 +93,9 @@ export default defineComponent({
         const processBoxIsShow = ref(false)
         const submitterId = ref('')
         const statusString = ref('')
+        const backTabName = ref('')
+        const backTabStatusString = ref('')
+
 
         processorGetSubmission(props.submissionId)
             .then(response => {
@@ -94,6 +109,7 @@ export default defineComponent({
                     submissionDetails.Paragraphs.push(new ParagraphDetials(element.sequence, new DateTime(element.creationTime), element.sender, element.textContent, element.pictureUrls));
                 });
                 statusString.value = computeStatusString(response.data.status)
+                changeBackTab(submissionDetails.Status)
             })
             .catch(error => {
                 const errorCode = error.response.status as number
@@ -143,16 +159,48 @@ export default defineComponent({
             }
         }
 
+        const changeBackTab = (status: SubmissionStatus) => {
+            switch (status) {
+                case SubmissionStatus.toBeProcessed:
+                    backTabName.value = 'a'
+                    backTabStatusString.value = '待处理'
+                    break;
+
+                case SubmissionStatus.toBeSupplemented:
+                    backTabName.value = 'b'
+                    backTabStatusString.value = '待完善'
+                    break;
+
+                case SubmissionStatus.toBeEvaluated:
+                    backTabName.value = 'c'
+                    backTabStatusString.value = '待评价'
+                    break;
+
+                case SubmissionStatus.closed:
+                    backTabName.value = 'd'
+                    backTabStatusString.value = '已关闭'
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         return {
             tel, email, submitterName, submitterId,
             statusString, processBoxIsShow,
             submissionDetails,
+            backTabStatusString, backTabName,
             parseSender,
         }
     }
 })
 </script>
 <style scoped>
+.header {
+    background-color: white;
+}
+
 .background {
     background-color: #fbfaf9;
 }
@@ -185,6 +233,7 @@ export default defineComponent({
 }
 
 #submitterInfo {
+    float: left;
     margin-left: 20px;
     padding-top: 20px;
 }
@@ -193,5 +242,19 @@ export default defineComponent({
     text-align: left;
     color: #666666;
     line-height: 12px;
+}
+
+#backLink {
+    float: left;
+    width: 60%;
+    text-align: left;
+    margin-top: 20px;
+    top: 10px;
+    left: calc(50vw - 175px);
+    color: rgb(189, 183, 183)
+}
+
+#backLink:hover {
+    color: #1890ff;
 }
 </style>
