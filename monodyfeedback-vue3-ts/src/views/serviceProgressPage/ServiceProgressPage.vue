@@ -30,10 +30,7 @@ import { message } from 'ant-design-vue';
 import * as signalR from '@microsoft/signalr';
 import { IHttpConnectionOptions } from '@microsoft/signalr';
 let connection: signalR.HubConnection | null;  // 到SignalR服务器的连接
-
-interface reacInfos {
-    infos: SubmissionInfo[]
-}
+let connection2: signalR.HubConnection | null;
 
 export default defineComponent({
     components: {
@@ -58,7 +55,6 @@ export default defineComponent({
                             new DateTime(element.lastInteractionTime),  // 这里如果不new一个DateTime，则无法使用DateTime类中的方法
                             element.status))
                     });
-                    console.log(submissionInfos)
                 })
                 .catch(error => {
                     console.error('获取Submissions失败', `${error.response.status}: ${error.response.data}`)
@@ -71,21 +67,39 @@ export default defineComponent({
                 skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets,  // 禁用协商
                 accessTokenFactory: () => token  // 使请求的时候url带上accessToken
             };
+            
             connection = new signalR.HubConnectionBuilder()
                 .withUrl(process.env.VUE_APP_SUBMITER_SIGNALR_URL, options as IHttpConnectionOptions)
                 .withAutomaticReconnect()  // 自动重连
                 .build();
             await connection.start()
-
             connection.on("SubmissionToBeSupplemented", receivedMessage => {
                 message.info('你有新的待完善问题')
                 let receivedSubmissionInfo = new SubmissionInfo(receivedMessage.id, receivedMessage.describe,
                     new DateTime(receivedMessage.lastInteractionTime), receivedMessage.status);
                 spliceAndUnshiftOnSubmissionInfos(receivedSubmissionInfo);
             });
-
             connection.on("SubmissionToBeEvaluated", receivedMessage => {
                 message.info("你有新的待评价问题")
+                let receivedSubmissionInfo = new SubmissionInfo(receivedMessage.id, receivedMessage.describe,
+                    new DateTime(receivedMessage.lastInteractionTime), receivedMessage.status);
+                spliceAndUnshiftOnSubmissionInfos(receivedSubmissionInfo);
+            })
+
+
+            connection2 = new signalR.HubConnectionBuilder()
+                .withUrl(process.env.VUE_APP_COMMONHUB_URL, options as IHttpConnectionOptions)
+                .withAutomaticReconnect()
+                .build();
+            await connection2.start();
+            connection2.on('SubmissionUnsupplementForLongAutoClose', receivedMessage => {
+                message.info("你有问题因长时间未完善而自动关闭")
+                let receivedSubmissionInfo = new SubmissionInfo(receivedMessage.id, receivedMessage.describe,
+                    new DateTime(receivedMessage.lastInteractionTime), receivedMessage.status);
+                spliceAndUnshiftOnSubmissionInfos(receivedSubmissionInfo);
+            });
+            connection2.on('SubmissionUnevaluatedForLongAutoClose', receivedMessage => {
+                message.info('你有问题因长时间未评价而自动关闭');
                 let receivedSubmissionInfo = new SubmissionInfo(receivedMessage.id, receivedMessage.describe,
                     new DateTime(receivedMessage.lastInteractionTime), receivedMessage.status);
                 spliceAndUnshiftOnSubmissionInfos(receivedSubmissionInfo);
@@ -112,6 +126,7 @@ export default defineComponent({
 
         onBeforeUnmount(() => {
             connection?.stop()  // 退出界面时断开SignalR连接
+            connection2?.stop()
         })
 
         const jumpToSumitPage = () => {

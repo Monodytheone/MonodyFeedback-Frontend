@@ -1,8 +1,8 @@
 <template>
-    <SubmissionItem v-for="(info) in submissionInfos" :info="info" :isShownForSubmitter="false" />
+    <SubmissionItem v-for="(info) in submissionInfos" :info="info" :isShownForSubmitter="false" :key="key"/>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, onBeforeMount } from 'vue';
+import { defineComponent, reactive, onBeforeMount, ref } from 'vue';
 import SubmissionItem from '@/components/SubmissionItem.vue';
 import SubmissionInfo from '@/types/SubmissionInfo';
 import getToBeProcessedSubmissionInfosOfProcessor from '@/api/processAPIs/getToBeProcessedSubmissionInfosOfProcessor';
@@ -19,6 +19,7 @@ export default defineComponent({
     },
     setup(props, { expose }) {
         const submissionInfos = reactive<SubmissionInfo[]>([]);
+        const key = ref(0)
 
         onBeforeMount(() => {
             getToBeProcessedSubmissionInfosOfProcessor()
@@ -47,13 +48,18 @@ export default defineComponent({
                 })
                 .finally(() => {
                     props.enableAssignButton()
-                })
+                });       
+        };
+
+        const pushNewItem = (newItem: SubmissionInfo) => {
+            submissionInfos.push(newItem)
+            key.value++
         }
 
-        expose({ handleAssign })
+        expose({ handleAssign, pushNewItem })
 
         return {
-            submissionInfos,
+            submissionInfos, key
         }
     }
 })

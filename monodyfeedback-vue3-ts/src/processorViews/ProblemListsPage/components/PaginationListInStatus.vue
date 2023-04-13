@@ -1,8 +1,8 @@
 <template>
-    <SubmissionItem v-for="(info) in submissionInfos" :info="info" :isShownForSubmitter="false" />
+    <SubmissionItem v-for="(info) in submissionInfos" :info="info" :isShownForSubmitter="false" :key="key" />
     <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="total" size="small" show-size-changer
-        :pageSizeOptions="pageSizeOptions" @showSizeChange="onShowSizeChange" @change="onChange" 
-        :show-total="(totalNumber: number) => `共 ${totalNumber} 个`"/>
+        :pageSizeOptions="pageSizeOptions" @showSizeChange="onShowSizeChange" @change="onChange"
+        :show-total="(totalNumber: number) => `共 ${totalNumber} 个`" />
 </template>
 <script lang="ts">
 import { defineComponent, reactive, onBeforeMount, ref } from 'vue';
@@ -26,7 +26,8 @@ export default defineComponent({
         const currentPage = ref(1)
         const pageSizeOptions = ref<string[]>(['3', '4', '5', '6', '7', '8', '9', '10', '12', '15', '20', '30'])
         const pageSize = ref(7)
-        const total = ref<Number>()
+        const total = ref(0)
+        const key = ref(0)
 
         getNumberOfSubmissionsInStatus(props.status)
             .then(response => {
@@ -79,9 +80,18 @@ export default defineComponent({
                 })
         }
 
+        /** 在头部插入新的条目 */
+        const unshiftNewItem = (newItem: SubmissionInfo) => {
+            submissionInfos.unshift(newItem)// 在数组首部插入新的SubmissionInfo
+            total.value++;
+            key.value++
+        }
+
+        context.expose({ unshiftNewItem })
+
         return {
             submissionInfos, currentPage, pageSizeOptions, pageSize,
-            total,
+            total, key,
             onShowSizeChange, onChange,
         }
     }

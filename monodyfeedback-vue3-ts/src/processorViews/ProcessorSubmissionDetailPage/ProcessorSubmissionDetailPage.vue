@@ -246,7 +246,7 @@ export default defineComponent({
 
 #backLink {
     float: left;
-    width: 60%;
+    width: 50%;
     text-align: left;
     margin-top: 20px;
     top: 10px;
