@@ -51,14 +51,27 @@
                             }}</a-button>
                         </a-popconfirm>
 
+                        <div style="height: 30px;" />
 
+                        <!-- 条目： -->
                         <p class="page-item" v-for="page in tab.pageInfos" @click="clickPage(page.pageId)">
+
                             <img class=" hot" v-if="page.isHot" src="@/assets/hot.png" alt="">
-                            {{ page.title }}
+                            <a-popover title="热门状态管理" trigger="hover">
+                                <template #content>
+                                    <a-button v-if="page.isHot === false" type="primary"
+                                        @click="handleChangePageHotStatus(page.pageId, true)">设为热门</a-button>
+                                    <a-button v-if="page.isHot" danger
+                                        @click="handleChangePageHotStatus(page.pageId, false)">取消热门</a-button>
+                                </template>
+                                <span style="cursor: pointer;">
+                                    {{ page.title }}
+                                </span>
+                            </a-popover>
+
                             <a-button size="small" style="float: right" type="link"
                                 @click="$router.push(`/master/page?pageId=${page.pageId}`)">进入页面</a-button>
                             <div style="clear: both" />
-
 
                             <span class="buttons">
                                 <a-popconfirm ok-text="确认" cancel-text="取消" @confirm="confirmPageMove(page.pageId, true)"
@@ -130,6 +143,7 @@ import deleteTab from '@/api/faqManageAPIs/deleteTab';
 import createPage from '@/api/faqManageAPIs/createPage';
 import sortPagesInTab from '@/api/faqManageAPIs/sortPagesInTab';
 import deletePage from '@/api/faqManageAPIs/deletePage';
+import changeHotStatusOfPage from '@/api/faqManageAPIs/changeHotStatusOfPage';
 export default defineComponent({
     setup() {
         const active = ref(0)
@@ -357,6 +371,17 @@ export default defineComponent({
                 })
         }
 
+        const handleChangePageHotStatus = (pageId: string, isHot: boolean) => {
+            changeHotStatusOfPage(pageId, isHot)
+                .then(response => {
+                    message.success("热门状态设置成功");
+                    refreshData(active.value);
+                })
+                .catch(error => {
+                    showErrorModal(`修改页面热门状态失败, ${error.response.status}: ${error.response.data}`);
+                })
+        }
+
         return {
             active,
             tabKey,
@@ -381,6 +406,7 @@ export default defineComponent({
             confirmCreatePage,
             confirmPageMove,
             confirmDeletePage,
+            handleChangePageHotStatus,
         }
     }
 })
@@ -408,7 +434,6 @@ export default defineComponent({
     padding: 7px 0;
     width: 90%;
     border-bottom: 1px #dddddd solid;
-    cursor: pointer;
 }
 
 .hot {
@@ -416,7 +441,6 @@ export default defineComponent({
 }
 
 .arrow {
-    /* text-align: right; */
     float: right;
     padding-right: 10px;
     padding-top: 4px;

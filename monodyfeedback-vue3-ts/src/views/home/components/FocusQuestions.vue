@@ -54,13 +54,6 @@ export default defineComponent({
                 console.error(`获取常见问题信息失败，" + ${error.response.status}: ${error.response.data}`)
             })
 
-        // let activeFormLocalStorage = localStorage.getItem("submitterHomeActive")
-        // if (activeFormLocalStorage != null) {
-        //     active.value = activeFormLocalStorage as unknown as number
-        //     console.log(active.value)
-        //     tabKey.value++
-        // }
-
         const clickPage = (id: string) => {
             router.push(`/FAQPage?pageId=${id}`)
         }
