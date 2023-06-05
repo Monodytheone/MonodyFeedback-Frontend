@@ -26,8 +26,10 @@
                             <div class="buttons">
                                 <a-button size="small" type="link" @click="handleChangeQandA">修改Q&A</a-button>
                                 <span style="float:right; ">
-                                    <a-button size="small" v-if="index !== 0"><van-icon name="arrow-up" /></a-button>
-                                    <a-button size="small" v-if="index !== data.qandAs.length - 1"><van-icon
+                                    <a-button size="small" v-if="index !== 0"><van-icon name="arrow-up"
+                                            @click="handleQandAMove(qandA.qandAId, true)" /></a-button>
+                                    <a-button size="small" v-if="index !== data.qandAs.length - 1"
+                                        @click="handleQandAMove(qandA.qandAId, false)"><van-icon
                                             name="arrow-down" /></a-button>
                                 </span>
                                 <div style="clear: both" />
@@ -56,6 +58,7 @@ import router from '@/router';
 import modifyQandA from '@/api/faqManageAPIs/modifyQandA';
 import { message } from 'ant-design-vue';
 import showErrorModal from '@/common/showErrorModal';
+import sortQandAsInPage from '@/api/faqManageAPIs/sortQandAsInPage';
 export default defineComponent({
     name: 'FAQPage',
     props: {
@@ -72,15 +75,15 @@ export default defineComponent({
 
         const refreshData = () => {
             masterGetPage(props.pageId)
-            .then(response => {
-                console.log(response.data);
-                data.value = response.data;
-            })
-            .catch(error => {
+                .then(response => {
+                    console.log(response.data);
+                    data.value = response.data;
+                })
+                .catch(error => {
 
-            })
+                })
         }
-        
+
         refreshData();
 
         const handleBack = () => {
@@ -115,6 +118,32 @@ export default defineComponent({
                 })
         }
 
+        const handleQandAMove = (qandAId:string, moveForword: Boolean) => {
+            let qandAIds: string[] = [];
+            data.value.qandAs.forEach((qandA: any) => {
+                qandAIds.push(qandA.qandAId);
+            })
+            if(moveForword) {
+                let temp = qandAIds[showingIndex.value as number];
+                qandAIds[showingIndex.value as number] = qandAIds[showingIndex.value as number - 1];
+                qandAIds[showingIndex.value as number - 1] = temp;
+            }
+            else {
+                let temp = qandAIds[showingIndex.value as number];
+                qandAIds[showingIndex.value as number] = qandAIds[showingIndex.value as number + 1];
+                qandAIds[showingIndex.value as number + 1] = temp;
+            }
+
+            sortQandAsInPage(props.pageId, qandAIds)
+                .then(response => {
+                    message.success(moveForword ? "前移成功" : "后移成功");
+                    refreshData();
+                })
+                .catch(error => {
+                    showErrorModal(`移动Q&A失败，${error.response.status}: ${error.response.data}`);
+                })
+        }
+
 
 
         return {
@@ -125,7 +154,8 @@ export default defineComponent({
             handleBack,
             handlePopoverVisibleChange,
             handleClickQandA,
-            handleChangeQandA
+            handleChangeQandA,
+            handleQandAMove
         }
     }
 })
