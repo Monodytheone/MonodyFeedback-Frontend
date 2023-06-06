@@ -43,6 +43,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('@/views/changePasswordPage/ChangePasswordWithUserNamePage.vue'),
   },
   {
+    path: '/FAQPage',
+    component: () => import('@/views/FAQPage/FAQPage.vue'),
+    props: route => ({ pageId: route.query.pageId })
+  },
+  {
     path: '/progress/submission',
     name: 'SubmissionDetialPage',
     component: () => import('@/views/SubmissionDetailsPage/SubmissionDetailsPage.vue'),
@@ -67,7 +72,26 @@ const routes: Array<RouteRecordRaw> = [
     path: '/processor/problems',
     name: 'ProblemListPage',
     component: () => import('@/processorViews/ProblemListsPage/ProblemListPage.vue'),
-    props: route => ({activeName: route.query.active})
+    props: route => ({ activeName: route.query.active })
+  },
+
+  {
+    path: '/master',
+    name: 'MasterHome',
+    component: () => import('@/masterViews/masterHome/MasterHome.vue')
+  },
+  {
+    path: '/masterLogin',
+    component: () => import('@/masterViews/masterLoginPage/MasterLoginPage.vue')
+  },
+  {
+    path: '/master/FAQ',
+    component: () => import('@/masterViews/FAQManage/FAQManage.vue')
+  },
+  {
+    path: '/master/Page',
+    component: () => import('@/masterViews/pageManage/PageManage.vue'),
+    props: route => ({ pageId: route.query.pageId })
   },
 ]
 
